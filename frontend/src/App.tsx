@@ -1,27 +1,32 @@
 // src/App.tsx
 import React, { useState, useEffect } from 'react';
 import './index.css'; // Import global CSS (bao gồm Tailwind CSS)
-import LoginForm from './components/LoginForm'; // Import component LoginForm
-import IndividualList from './components/IndividualList'; // <-- THÊM DÒNG NÀY: Import IndividualList
+import LoginForm from './components/LoginForm';
+import Sidebar from './components/Sidebar';
+import DashboardPage from './components/DashboardPage';
+import SettingsPage from './components/SettingsPage'; // <-- Đảm bảo đường dẫn này đúng
+import { ToastProvider } from './hooks/use-toast'; // <-- THÊM DÒNG NÀY
+import { LanguageProvider } from './contexts/language-context'; // <-- THÊM DÒNG NÀY
 
 function App() {
-  // State để lưu trữ token và thông tin người dùng đã đăng nhập
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<{ id: number; username: string; email: string } | null>(null);
-  const [message, setMessage] = useState(''); // State cho thông báo chung (ví dụ: đăng xuất)
+  const [message, setMessage] = useState('');
+  const [currentPage, setCurrentPage] = useState<'dashboard' | 'settings'>('dashboard'); // Trang mặc định là Dashboard
 
-  // Kiểm tra token trong localStorage khi ứng dụng khởi động
+  // Kiểm tra token và user info trong localStorage khi ứng dụng khởi động
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
-    if (storedToken) {
+    const storedUser = localStorage.getItem('user');
+    if (storedToken && storedUser) {
       setToken(storedToken);
-      // Để đơn giản, giả sử user info cũng được lưu hoặc lấy lại từ token
-      // Trong ứng dụng thực tế, bạn sẽ cần một API để xác thực token và trả về user info
-      // Tạm thời, mình sẽ đặt một user dummy nếu có token, sau này sẽ lấy từ backend
-      // Khi đăng nhập thành công, user object đã có đủ thông tin
-      // Để xử lý trường hợp refresh trang, bạn cần một API backend để xác thực token và trả về user info
-      // Hiện tại, mình sẽ giả định user id là 1 nếu có token nhưng không có user info
-      setUser({ id: 1, username: 'Người dùng', email: 'user@example.com' }); // Giá trị tạm thời
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (e) {
+        console.error("Failed to parse user from localStorage", e);
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+      }
     }
   }, []);
 
@@ -29,16 +34,20 @@ function App() {
   const handleLoginSuccess = (newToken: string, newUser: { id: number; username: string; email: string }) => {
     setToken(newToken);
     setUser(newUser);
+    localStorage.setItem('token', newToken);
+    localStorage.setItem('user', JSON.stringify(newUser));
     setMessage('Đăng nhập thành công!');
-    console.log('Đăng nhập thành công, token:', newToken, 'User:', newUser);
+    setCurrentPage('dashboard'); // Sau khi đăng nhập, chuyển đến trang Dashboard
   };
 
   // Hàm xử lý đăng xuất
   const handleLogout = () => {
-    localStorage.removeItem('token'); // Xóa token khỏi localStorage
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     setToken(null);
     setUser(null);
     setMessage('Bạn đã đăng xuất.');
+    // setCurrentPage('dashboard'); // Sau khi logout, có thể về trang dashboard hoặc login, tùy mày
   };
 
   // Giữ lại phần kiểm tra kết nối backend chung
@@ -64,42 +73,59 @@ function App() {
     fetchBackendMessage();
   }, [BACKEND_URL]);
 
+  // Đảm bảo dark mode luôn bật cho toàn bộ ứng dụng (nền đen tuyền)
+  useEffect(() => {
+    document.documentElement.classList.add('dark');
+    document.body.style.backgroundColor = '#000000'; // Nền đen tuyền cho toàn bộ body
+  }, []);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-background text-foreground p-4 rounded-lg">
-      {message && (
-        <p className={`mb-4 text-center ${message.includes('thành công') || message.includes('đăng xuất') ? 'text-green-500' : 'text-red-500'}`}>
-          {message}
-        </p>
-      )}
+    <ToastProvider> {/* Bọc toàn bộ ứng dụng bằng ToastProvider */}
+      <LanguageProvider> {/* Bọc toàn bộ ứng dụng bằng LanguageProvider */}
+        <div className="min-h-screen flex flex-col bg-black text-white"> {/* Nền đen tuyền cho toàn bộ app */}
+          {message && (
+            <p className={`mb-4 text-center p-2 ${message.includes('thành công') || message.includes('đăng xuất') ? 'bg-green-900 text-green-200' : 'bg-red-900 text-red-200'}`}>
+              {message}
+            </p>
+          )}
 
-      {!token || !user ? ( // Nếu chưa có token hoặc user info, hiển thị LoginForm
-        <LoginForm onLoginSuccess={handleLoginSuccess} />
-      ) : ( // Nếu đã có token và user info, hiển thị IndividualList
-        <div className="w-full max-w-4xl text-center">
-          <h2 className="text-2xl font-bold text-primary mb-4">Chào mừng, {user.username}!</h2>
-          <p className="text-muted-foreground mb-4">Email: {user.email}</p>
-          <button
-            className="px-6 py-3 bg-destructive text-destructive-foreground rounded-lg shadow-lg hover:bg-destructive/80 transition-colors mb-8"
-            onClick={handleLogout}
-          >
-            Đăng xuất
-          </button>
+          {!token || !user ? (
+            <LoginForm onLoginSuccess={handleLoginSuccess} />
+          ) : (
+            <div className="flex flex-1"> {/* Sử dụng flex để sidebar và content nằm cạnh nhau */}
+              {/* Sidebar */}
+              <Sidebar
+                currentPage={currentPage}
+                onNavigate={setCurrentPage}
+                onLogout={handleLogout}
+                username={user.username}
+              />
 
-          {/* Hiển thị component quản lý cá thể */}
-          <IndividualList token={token} userId={user.id} />
+              {/* Main Content Area */}
+              <main className="flex-1 p-4 overflow-y-auto"> {/* Thêm overflow-y-auto để cuộn nếu nội dung dài */}
+                <div className="w-full max-w-4xl mx-auto"> {/* Giới hạn chiều rộng nội dung */}
+                  {/* Render trang hiện tại */}
+                  {currentPage === 'dashboard' && <DashboardPage />}
+                  {currentPage === 'settings' && <SettingsPage />}
+                </div>
 
-          <p className="text-xl font-medium text-center mt-8 p-4 bg-muted text-muted-foreground rounded-lg shadow-md">
-            Thông điệp từ Backend: <span className="font-bold">{backendMessage}</span>
-          </p>
-          <p className="text-sm text-accent-foreground mt-8">
-            Mở trình duyệt trên thiết bị khác và truy cập:
-            <br />
-            <span className="font-mono bg-muted p-1 rounded">http://192.168.1.3:5173</span>
-          </p>
+                {/* Phần thông điệp backend và IP ở cuối trang */}
+                <div className="w-full max-w-4xl mx-auto text-center mt-8 p-4 bg-gray-800 text-gray-400 rounded-lg shadow-md">
+                  <p className="text-lg font-medium">
+                    Thông điệp từ Backend: <span className="font-bold">{backendMessage}</span>
+                  </p>
+                  <p className="text-sm mt-2">
+                    Mở trình duyệt trên thiết bị khác và truy cập:
+                    <br />
+                    <span className="font-mono bg-gray-700 p-1 rounded">http://192.168.1.3:5173</span>
+                  </p>
+                </div>
+              </main>
+            </div>
+          )}
         </div>
-      )}
-    </div>
+      </LanguageProvider>
+    </ToastProvider>
   );
 }
 

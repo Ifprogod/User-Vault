@@ -7,7 +7,7 @@ import bcrypt from 'bcryptjs';
 // Thông tin tài khoản admin test mặc định
 const ADMIN_USERNAME = 'AdminTest';
 const ADMIN_EMAIL = 'admin@test.com';
-const ADMIN_PASSWORD = 'admin'; // Đảm bảo mật khẩu này khớp với mật khẩu mày dùng để test
+const ADMIN_PASSWORD = 'admin123'; // Đảm bảo mật khẩu này khớp với mật khẩu mày dùng để test
 
 export async function seedAdminUser() {
   try {
