@@ -1,19 +1,60 @@
-# Node.js
-node_modules
-dist
-npm-debug.log
-.env
-
-# Log files
+# Logs
+logs
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
+.pnpm-debug.log*
 
-# OS files
+# Dependency directories
+node_modules/
+jspm_packages/
+web_modules/
+
+# Optional npm cache directory
+.npm/
+
+# Optional eslint cache
+.eslintcache
+
+# Optional REPL history
+.node_repl_history
+
+# dotenv environment variables file
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Next.js build output
+.next/
+
+# Vite build output
+dist/
+
+# macOS
 .DS_Store
-Thumbs.db
+
+# VS Code
+.vscode/
 
 # Termux specific
-*.bak
+termux-build/
+
+# Drizzle specific - if any auto-generated files are outside of schema/migrations
+drizzle/
+
+# Backend specific
+backend/node_modules/
+backend/dist/
+backend/.env
+
+# Frontend specific
+frontend/node_modules/
+frontend/dist/
+frontend/.env
