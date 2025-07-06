@@ -2,7 +2,7 @@
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { db } from '../db';
+import { getDb } from '../db/db'; // <-- Đã đổi thành getDb
 import { users as usersTable } from '../db/schema';
 import { eq } from 'drizzle-orm';
 import dotenv from 'dotenv';
@@ -19,6 +19,7 @@ if (!JWT_SECRET) {
 // Route đăng ký người dùng
 router.post('/register', async (req, res) => {
   try {
+    const db = await getDb(); // <-- Gọi hàm getDb
     const { name, email, password } = req.body;
 
     if (!name || !email || !password) {
@@ -36,18 +37,18 @@ router.post('/register', async (req, res) => {
 
     // Tạo người dùng mới
     const newUser = {
-      name,
-      email,
-      passwordHash: hashedPassword,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+     username: name,
+     email,
+     passwordHash: hashedPassword,
+     createdAt: new Date(),
+     updatedAt: new Date(),
     };
 
     const result = await db.insert(usersTable).values(newUser).returning();
     const user = result[0];
 
     // Tạo JWT
-    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '30d' });
 
     res.status(201).json({
       message: 'Đăng ký thành công!',
@@ -63,6 +64,7 @@ router.post('/register', async (req, res) => {
 // Route đăng nhập người dùng
 router.post('/login', async (req, res) => {
   try {
+    const db = await getDb(); // <-- Gọi hàm getDb
     const { email, password } = req.body;
 
     if (!email || !password) {

@@ -1,4 +1,6 @@
 // src/components/UserManagement.tsx
+"use client";
+
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,12 +18,12 @@ import {
   Filter,
   User
 } from "lucide-react";
-import { UserForm } from "./UserForm"; // <-- Đảm bảo đường dẫn đúng
-import { UserProfile, InsertUserProfile, UpdateUserProfile } from "@/lib/types"; // <-- Import từ lib/types
-import { apiRequest } from "@/lib/queryClient"; // <-- Import từ lib/queryClient
-import { useToast } from "@/hooks/use-toast"; // Cái này đã có
+import { UserForm } from "./UserForm";
+import { UserProfile, InsertUserProfile, UpdateUserProfile } from "@/lib/types";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
-export function UserManagement() { // Đổi thành export function thay vì export default
+export function UserManagement() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [showUserForm, setShowUserForm] = useState(false);
@@ -48,15 +50,15 @@ export function UserManagement() { // Đổi thành export function thay vì exp
       setShowUserForm(false);
       setIsCreating(false);
       toast({
-        title: "Thành công", // Đã dịch
-        description: "Người dùng đã được tạo thành công", // Đã dịch
+        title: "Thành công",
+        description: "Người dùng đã được tạo thành công",
       });
     },
     onError: (error) => {
-      console.error("Lỗi khi tạo người dùng:", error); // Đã dịch
+      console.error("Lỗi khi tạo người dùng:", error);
       toast({
-        title: "Lỗi", // Đã dịch
-        description: "Không thể tạo người dùng", // Đã dịch
+        title: "Lỗi",
+        description: "Không thể tạo người dùng",
         variant: "destructive",
       });
     },
@@ -72,15 +74,15 @@ export function UserManagement() { // Đổi thành export function thay vì exp
       setShowUserForm(false);
       setSelectedUser(null);
       toast({
-        title: "Thành công", // Đã dịch
-        description: "Người dùng đã được cập nhật thành công", // Đã dịch
+        title: "Thành công",
+        description: "Người dùng đã được cập nhật thành công",
       });
     },
     onError: (error) => {
-      console.error("Lỗi khi cập nhật người dùng:", error); // Đã dịch
+      console.error("Lỗi khi cập nhật người dùng:", error);
       toast({
-        title: "Lỗi", // Đã dịch
-        description: "Không thể cập nhật người dùng", // Đã dịch
+        title: "Lỗi",
+        description: "Không thể cập nhật người dùng",
         variant: "destructive",
       });
     },
@@ -93,15 +95,15 @@ export function UserManagement() { // Đổi thành export function thay vì exp
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
       toast({
-        title: "Thành công", // Đã dịch
-        description: "Người dùng đã được xóa thành công", // Đã dịch
+        title: "Thành công",
+        description: "Người dùng đã được xóa thành công",
       });
     },
     onError: (error) => {
-      console.error("Lỗi khi xóa người dùng:", error); // Đã dịch
+      console.error("Lỗi khi xóa người dùng:", error);
       toast({
-        title: "Lỗi", // Đã dịch
-        description: "Không thể xóa người dùng", // Đã dịch
+        title: "Lỗi",
+        description: "Không thể xóa người dùng",
         variant: "destructive",
       });
     },
@@ -114,15 +116,15 @@ export function UserManagement() { // Đổi thành export function thay vì exp
     },
     onSuccess: (data) => {
       toast({
-        title: "Xuất dữ liệu thành công", // Đã dịch
+        title: "Xuất dữ liệu thành công",
         description: data.message,
       });
     },
     onError: (error) => {
-      console.error("Lỗi khi xuất dữ liệu:", error); // Đã dịch
+      console.error("Lỗi khi xuất dữ liệu:", error);
       toast({
-        title: "Lỗi", // Đã dịch
-        description: "Không thể xuất dữ liệu", // Đã dịch
+        title: "Lỗi",
+        description: "Không thể xuất dữ liệu",
         variant: "destructive",
       });
     },
@@ -141,7 +143,7 @@ export function UserManagement() { // Đổi thành export function thay vì exp
   };
 
   const handleDeleteUser = (user: UserProfile) => {
-    if (window.confirm(`Mày có chắc chắn muốn xóa ${user.name}?`)) { // Đã dịch
+    if (window.confirm(`Mày có chắc chắn muốn xóa ${user.name}?`)) {
       deleteUserMutation.mutate(user.id);
     }
   };
@@ -158,7 +160,7 @@ export function UserManagement() { // Đổi thành export function thay vì exp
   };
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, string> = { // Khai báo rõ ràng kiểu
+    const variants: Record<string, string> = {
       active: "bg-green-500/20 text-green-400",
       pending: "bg-yellow-500/20 text-yellow-400", 
       inactive: "bg-red-500/20 text-red-400"
@@ -166,21 +168,21 @@ export function UserManagement() { // Đổi thành export function thay vì exp
     return variants[status] || variants.active;
   };
 
-  const formatTimeAgo = (date: Date | null | string) => { // Chấp nhận string
-    if (!date) return "Không bao giờ"; // Đã dịch
+  const formatTimeAgo = (date: Date | null | string) => {
+    if (!date) return "Không bao giờ";
     const now = new Date();
-    const inputDate = new Date(date); // Chuyển đổi string sang Date
+    const inputDate = new Date(date);
     const diffMs = now.getTime() - inputDate.getTime();
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    if (diffHours < 24) return `${diffHours}h trước`; // Đã dịch
+    if (diffHours < 24) return `${diffHours}h trước`;
     const diffDays = Math.floor(diffHours / 24);
-    return `${diffDays}d trước`; // Đã dịch
+    return `${diffDays}d trước`;
   };
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-muted-foreground">Đang tải người dùng...</div> {/* Đã dịch */}
+        <div className="text-muted-foreground">Đang tải người dùng...</div>
       </div>
     );
   }
@@ -188,10 +190,10 @@ export function UserManagement() { // Đổi thành export function thay vì exp
   return (
     <div className="space-y-6">
       {/* Header */}
-      <Card className="bg-gray-900 border-gray-700"> {/* Đã đổi màu nền cho Shadcn Card */}
+      <Card className="bg-gray-900 border-gray-700">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="text-lg font-semibold text-white"> {/* Đã đổi màu chữ */}
+            <CardTitle className="text-lg font-semibold text-white">
               Quản lý Dữ liệu Người dùng
             </CardTitle>
             <div className="flex space-x-2">
@@ -200,14 +202,14 @@ export function UserManagement() { // Đổi thành export function thay vì exp
                 disabled={exportDataMutation.isPending}
                 variant="outline"
                 size="sm"
-                className="bg-gray-800 text-gray-300 border-gray-600 hover:bg-gray-700 hover:text-white" // Đã thêm màu cho Button Outline
+                className="bg-gray-800 text-gray-300 border-gray-600 hover:bg-gray-700 hover:text-white"
               >
                 <Download className="mr-2" size={16} />
-                {exportDataMutation.isPending ? "Đang xuất..." : "Xuất"} {/* Đã dịch */}
+                {exportDataMutation.isPending ? "Đang xuất..." : "Xuất"}
               </Button>
-              <Button size="sm" className="bg-gray-800 text-gray-300 border-gray-600 hover:bg-gray-700 hover:text-white"> {/* Đã thêm màu cho Button */}
+              <Button size="sm" className="bg-gray-800 text-gray-300 border-gray-600 hover:bg-gray-700 hover:text-white">
                 <Filter className="mr-2" size={16} />
-                Lọc {/* Đã dịch */}
+                Lọc
               </Button>
             </div>
           </div>
@@ -216,65 +218,65 @@ export function UserManagement() { // Đổi thành export function thay vì exp
         <CardContent>
           <div className="flex items-center space-x-4 mb-6">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} /> {/* Đã đổi màu text */}
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
               <Input
-                placeholder="Tìm kiếm người dùng..." // Đã dịch
+                placeholder="Tìm kiếm người dùng..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-gray-800 border-gray-600 text-white placeholder:text-gray-400" // Đã thêm màu cho Input
+                className="pl-10 bg-gray-800 border-gray-600 text-white placeholder:text-gray-400"
               />
             </div>
             <Button 
               onClick={handleCreateUser}
-              className="bg-blue-600 hover:bg-blue-700 text-white" // Đã đổi màu cho Add Button
+              className="bg-blue-600 hover:bg-blue-700 text-white"
             >
               <Plus className="mr-2" size={16} />
-              Thêm Người dùng {/* Đã dịch */}
+              Thêm Người dùng
             </Button>
           </div>
 
           {/* Users Table */}
-          <div className="overflow-x-auto rounded-lg border border-gray-700"> {/* Thêm border và rounded cho bảng */}
+          <div className="overflow-x-auto rounded-lg border border-gray-700">
             <table className="w-full">
-              <thead className="bg-gray-800"> {/* Đã đổi màu nền thead */}
+              <thead className="bg-gray-800">
                 <tr>
-                  <th className="text-left p-4 text-sm font-medium text-gray-400">Hồ sơ</th> {/* Đã dịch */}
-                  <th className="text-left p-4 text-sm font-medium text-gray-400">Thông tin cá nhân</th> {/* Đã dịch */}
-                  <th className="text-left p-4 text-sm font-medium text-gray-400">Trạng thái</th> {/* Đã dịch */}
-                  <th className="text-left p-4 text-sm font-medium text-gray-400">Vị trí</th> {/* Đã dịch */}
-                  <th className="text-left p-4 text-sm font-medium text-gray-400">Cập nhật lần cuối</th> {/* Đã dịch */}
-                  <th className="text-left p-4 text-sm font-medium text-gray-400">Hành động</th> {/* Đã dịch */}
+                  <th className="text-left p-4 text-sm font-medium text-gray-400">Hồ sơ</th>
+                  <th className="text-left p-4 text-sm font-medium text-gray-400">Thông tin cá nhân</th>
+                  <th className="text-left p-4 text-sm font-medium text-gray-400">Trạng thái</th>
+                  <th className="text-left p-4 text-sm font-medium text-gray-400">Vị trí</th>
+                  <th className="text-left p-4 text-sm font-medium text-gray-400">Cập nhật lần cuối</th>
+                  <th className="text-left p-4 text-sm font-medium text-gray-400">Hành động</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-700 bg-gray-900"> {/* Đã đổi màu nền tbody và border */}
+              <tbody className="divide-y divide-gray-700 bg-gray-900">
                 {users.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="p-8 text-center text-gray-400"> {/* Đã đổi màu chữ */}
-                      Không tìm thấy người dùng nào. {searchQuery ? "Hãy thử điều chỉnh tìm kiếm của mày." : "Tạo người dùng đầu tiên của mày để bắt đầu."} {/* Đã dịch */}
+                    <td colSpan={6} className="p-8 text-center text-gray-400">
+                      Không tìm thấy người dùng nào. {searchQuery ? "Hãy thử điều chỉnh tìm kiếm của mày." : "Tạo người dùng đầu tiên của mày để bắt đầu."}
                     </td>
                   </tr>
                 ) : (
                   users.map((user) => (
-                    <tr key={user.id} className="hover:bg-gray-800 transition-colors"> {/* Đã đổi màu hover */}
+                    <tr key={user.id} className="hover:bg-gray-800 transition-colors">
                       <td className="p-4">
                         <div className="flex items-center space-x-3">
-                          <Avatar className="w-10 h-10 bg-gray-700"> {/* Đã thêm màu nền cho avatar fallback */}
+                          <Avatar className="w-10 h-10 bg-gray-700">
                             <AvatarImage src={user.profileImageUrl || undefined} />
                             <AvatarFallback>
-                              <User size={16} className="text-gray-300" /> {/* Đã thêm màu cho icon fallback */}
+                              <User size={16} className="text-gray-300" />
                             </AvatarFallback>
                           </Avatar>
                           <div>
-                            <p className="font-medium text-white">{user.name}</p> {/* Đã đổi màu chữ */}
-                            <p className="text-sm text-gray-400">{user.email}</p> {/* Đã đổi màu chữ */}
+                            <p className="font-medium text-white">{user.name}</p>
+                            <p className="text-sm text-gray-400">{user.email}</p>
                           </div>
                         </div>
                       </td>
                       <td className="p-4">
                         <div className="text-sm">
-                          {user.age && <p className="text-white">Tuổi: {user.age}</p>} {/* Đã dịch và đổi màu chữ */}
+                          {user.age && <p className="text-white">Tuổi: {user.age}</p>}
                           {user.dateOfBirth && (
-                            <p className="text-gray-400">Ngày sinh: {user.dateOfBirth}</p> {/* Đã dịch và đổi màu chữ */}
+                            <p className="text-gray-400">Ngày sinh: {user.dateOfBirth}</p>
                           )}
                         </div>
                       </td>
@@ -284,14 +286,14 @@ export function UserManagement() { // Đổi thành export function thay vì exp
                             {user.status}
                           </Badge>
                           {user.relationshipStatus && (
-                            <p className="text-gray-400 mt-1">{user.relationshipStatus}</p> {/* Đã đổi màu chữ */}
+                            <p className="text-gray-400 mt-1">{user.relationshipStatus}</p>
                           )}
                         </div>
                       </td>
                       <td className="p-4">
                         <div className="text-sm">
-                          {user.city && <p className="text-white">{user.city}</p>} {/* Đã đổi màu chữ */}
-                          {user.country && <p className="text-gray-400">{user.country}</p>} {/* Đã đổi màu chữ */}
+                          {user.city && <p className="text-white">{user.city}</p>}
+                          {user.country && <p className="text-gray-400">{user.country}</p>}
                         </div>
                       </td>
                       <td className="p-4">
@@ -305,7 +307,7 @@ export function UserManagement() { // Đổi thành export function thay vì exp
                             variant="ghost"
                             size="sm"
                             onClick={() => handleEditUser(user)}
-                            className="text-gray-300 hover:bg-gray-700 hover:text-white" // Đã thêm màu cho ghost button
+                            className="text-gray-300 hover:bg-gray-700 hover:text-white"
                           >
                             <Eye size={16} />
                           </Button>
@@ -313,7 +315,7 @@ export function UserManagement() { // Đổi thành export function thay vì exp
                             variant="ghost"
                             size="sm"
                             onClick={() => handleEditUser(user)}
-                            className="text-gray-300 hover:bg-gray-700 hover:text-white" // Đã thêm màu cho ghost button
+                            className="text-gray-300 hover:bg-gray-700 hover:text-white"
                           >
                             <Edit size={16} />
                           </Button>
@@ -321,7 +323,7 @@ export function UserManagement() { // Đổi thành export function thay vì exp
                             variant="ghost"
                             size="sm"
                             onClick={() => handleDeleteUser(user)}
-                            className="text-red-500 hover:bg-red-900 hover:text-red-400" // Đã thêm màu cho delete button
+                            className="text-red-500 hover:bg-red-900 hover:text-red-400"
                           >
                             <Trash2 size={16} />
                           </Button>
@@ -336,9 +338,9 @@ export function UserManagement() { // Đổi thành export function thay vì exp
 
           {/* Pagination */}
           {users.length > 0 && (
-            <div className="flex items-center justify-between pt-6 border-t border-gray-700"> {/* Đã đổi màu border */}
-              <div className="text-sm text-gray-400"> {/* Đã đổi màu chữ */}
-                Hiển thị {users.length} kết quả{users.length !== 1 ? 's' : ''} {/* Đã dịch */}
+            <div className="flex items-center justify-between pt-6 border-t border-gray-700">
+              <div className="text-sm text-gray-400">
+                Hiển thị {users.length} kết quả{users.length !== 1 ? 's' : ''}
               </div>
             </div>
           )}

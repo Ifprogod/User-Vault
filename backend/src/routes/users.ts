@@ -1,23 +1,23 @@
 // src/routes/users.ts
 import { Router } from 'express';
-import { db } from '../db';
+import { getDb } from '../db/db'; // <-- Đã đổi thành getDb
 import { users as usersTable } from '../db/schema';
-import { eq, like, or } from 'drizzle-orm'; // Thêm 'or' cho tìm kiếm
-import { authenticateToken } from '../middleware/auth'; // Import middleware xác thực token
+import { eq, like, or } from 'drizzle-orm';
+import { authenticateToken } from '../middleware/auth';
 
 const router = Router();
 
 // Middleware để kiểm tra và xác thực token cho tất cả các route dưới đây
-router.use(authenticateToken); // Áp dụng middleware xác thực
+router.use(authenticateToken);
 
 // GET /api/users - Lấy danh sách tất cả người dùng (có thể tìm kiếm)
 router.get('/users', async (req, res) => {
   try {
+    const db = await getDb(); // <-- Gọi hàm getDb
     const { search } = req.query;
     let users;
 
     if (search && typeof search === 'string') {
-      // Tìm kiếm theo tên hoặc email
       users = await db.select().from(usersTable).where(
         or(
           like(usersTable.name, `%${search}%`),
@@ -25,7 +25,6 @@ router.get('/users', async (req, res) => {
         )
       );
     } else {
-      // Lấy tất cả người dùng
       users = await db.select().from(usersTable);
     }
     res.json(users);
@@ -38,6 +37,7 @@ router.get('/users', async (req, res) => {
 // GET /api/users/:id - Lấy thông tin một người dùng cụ thể
 router.get('/users/:id', async (req, res) => {
   try {
+    const db = await getDb(); // <-- Gọi hàm getDb
     const userId = parseInt(req.params.id);
     if (isNaN(userId)) {
       return res.status(400).json({ message: 'ID người dùng không hợp lệ.' });
@@ -58,35 +58,31 @@ router.get('/users/:id', async (req, res) => {
 // POST /api/users - Tạo người dùng mới
 router.post('/users', async (req, res) => {
   try {
+    const db = await getDb(); // <-- Gọi hàm getDb
     const { name, email, age, dateOfBirth, status, relationshipStatus, city, country, profileImageUrl } = req.body;
 
-    // Kiểm tra các trường bắt buộc
     if (!name || !email) {
       return res.status(400).json({ message: 'Tên và Email là các trường bắt buộc.' });
     }
 
-    // Kiểm tra email đã tồn tại chưa
     const existingUser = await db.select().from(usersTable).where(eq(usersTable.email, email)).limit(1);
     if (existingUser.length > 0) {
       return res.status(409).json({ message: 'Email đã tồn tại.' });
     }
 
-    // Mật khẩu không cần thiết khi tạo user qua API này, vì nó không phải là route đăng ký
-    // Nếu mày muốn tạo user với mật khẩu từ đây, mày phải hash nó.
-    // Tạm thời, ta sẽ không yêu cầu password ở đây.
     const newUser = {
       name,
       email,
-      passwordHash: 'dummy_password_hash', // Đặt một hash giả hoặc null nếu schema cho phép
+      passwordHash: 'dummy_password_hash',
       age: age || null,
       dateOfBirth: dateOfBirth || null,
-      status: status || 'active', // Mặc định là 'active'
+      status: status || 'active',
       relationshipStatus: relationshipStatus || null,
       city: city || null,
       country: country || null,
       profileImageUrl: profileImageUrl || null,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: new Date(), // .toISOString()
+      updatedAt: new Date(), // .toISOString()
     };
 
     const result = await db.insert(usersTable).values(newUser).returning();
@@ -100,6 +96,7 @@ router.post('/users', async (req, res) => {
 // PUT /api/users/:id - Cập nhật thông tin người dùng
 router.put('/users/:id', async (req, res) => {
   try {
+    const db = await getDb(); // <-- Gọi hàm getDb
     const userId = parseInt(req.params.id);
     if (isNaN(userId)) {
       return res.status(400).json({ message: 'ID người dùng không hợp lệ.' });
@@ -135,6 +132,7 @@ router.put('/users/:id', async (req, res) => {
 // DELETE /api/users/:id - Xóa người dùng
 router.delete('/users/:id', async (req, res) => {
   try {
+    const db = await getDb(); // <-- Gọi hàm getDb
     const userId = parseInt(req.params.id);
     if (isNaN(userId)) {
       return res.status(400).json({ message: 'ID người dùng không hợp lệ.' });
