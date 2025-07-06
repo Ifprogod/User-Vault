@@ -13,6 +13,7 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
     // Dữ liệu dịch tạm thời cho các key mà sidebar dùng
     const translations: { [key: string]: string } = {
       'sidebar.dashboard': 'Dashboard',
+      'sidebar.userProfiles': 'Hồ sơ Người dùng',
       'sidebar.settings': 'Cài đặt',
       'sidebar.logout': 'Đăng xuất',
       'logout.toast.title': 'Đã đăng xuất',
