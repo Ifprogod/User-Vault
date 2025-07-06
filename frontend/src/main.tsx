@@ -13,14 +13,13 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60 * 5, // Dữ liệu được coi là "tươi" trong 5 phút (5 * 60 * 1000 ms)
-      // Nếu mày muốn nó luôn dùng cache ngay lập tức khi có, và chỉ fetch lại ngầm sau đó
-      // thì có thể thêm: refetchOnMount: false, refetchOnWindowFocus: false
     },
   },
 });
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
+    {/* Bọc toàn bộ App bằng các Providers ở cấp cao nhất */}
     <ToastProvider>
       <LanguageProvider>
         <QueryClientProvider client={queryClient}>

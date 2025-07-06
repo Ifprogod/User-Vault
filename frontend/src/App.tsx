@@ -5,8 +5,9 @@ import LoginForm from './components/LoginForm';
 import Sidebar from './components/Sidebar';
 import DashboardPage from './components/DashboardPage';
 import SettingsPage from './components/SettingsPage';
-import { UserManagement } from './components/UserManagement';
-import { useToast } from './hooks/use-toast'; // <-- Giờ có thể gọi useToast ở đây
+import { IndividualManagement } from './components/IndividualManagement'; // Đảm bảo import đúng tên này
+import { AccountManagement } from './components/AccountManagement'; // THÊM DÒNG NÀY
+import { useToast } from './hooks/use-toast';
 import { Menu } from 'lucide-react';
 
 // QueryClient và Providers đã được di chuyển lên main.tsx
@@ -14,11 +15,10 @@ import { Menu } from 'lucide-react';
 function App() {
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<{ id: number; username: string; email: string } | null>(null);
-  // Không cần state 'message' nữa, dùng toast
-  const [currentPage, setCurrentPage] = useState<'dashboard' | 'userProfiles' | 'settings'>('dashboard');
+  const [currentPage, setCurrentPage] = useState<'dashboard' | 'userProfiles' | 'accountManagement' | 'settings'>('dashboard'); // ĐÃ SỬA
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const { toast } = useToast(); // <-- Gọi useToast ở đây là an toàn rồi
+  const { toast } = useToast();
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -98,8 +98,6 @@ function App() {
 
   return (
     <div className="min-h-screen flex flex-col bg-black text-white">
-      {/* Không còn hiển thị message trực tiếp nữa, vì đã dùng toast */}
-
       {!token || !user ? (
         <LoginForm onLoginSuccess={handleLoginSuccess} />
       ) : (
@@ -133,7 +131,8 @@ function App() {
 
             <div className="w-full max-w-4xl mx-auto">
               {currentPage === 'dashboard' && <DashboardPage />}
-              {currentPage === 'userProfiles' && <UserManagement />}
+              {currentPage === 'userProfiles' && <IndividualManagement />}
+              {currentPage === 'accountManagement' && <AccountManagement />} {/* THÊM DÒNG NÀY */}
               {currentPage === 'settings' && <SettingsPage />}
             </div>
 

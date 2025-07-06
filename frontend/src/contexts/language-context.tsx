@@ -2,44 +2,114 @@
 import React, { createContext, useContext, ReactNode } from 'react';
 
 interface LanguageContextType {
-  t: (key: string) => string; // Hàm dịch (tạm thời chỉ trả về key)
+  t: (key: string, options?: { [key: string]: any }) => string; // Hàm dịch (tạm thời chỉ trả về key)
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // Hàm dịch đơn giản, chỉ trả về key. Mày có thể mở rộng sau.
-  const t = (key: string) => {
-    // Dữ liệu dịch tạm thời cho các key mà sidebar dùng
+  const t = (key: string, options?: { [key: string]: any }) => {
     const translations: { [key: string]: string } = {
       'sidebar.dashboard': 'Dashboard',
-      'sidebar.userProfiles': 'Hồ sơ Người dùng',
+      'sidebar.individualProfiles': 'Quản lý Hồ sơ',
+      'sidebar.accountManagement': 'Quản lý Tài khoản', // <-- THÊM DÒNG NÀY
       'sidebar.settings': 'Cài đặt',
       'sidebar.logout': 'Đăng xuất',
       'logout.toast.title': 'Đã đăng xuất',
       'logout.toast.description': 'Mày đã đăng xuất thành công.',
-      // Thêm các bản dịch khác nếu mày cần cho DashboardPage hoặc các trang khác
-      'dashboard.title': 'Dashboard của bạn',
-      'dashboard.description': 'Quản lý các hồ sơ cá nhân.',
-      'dashboard.addProfileButton': 'Thêm Hồ sơ',
-      'dashboard.searchPlaceholder': 'Tìm kiếm hồ sơ...',
-      'dashboard.noProfilesFound': 'Không tìm thấy hồ sơ nào.',
-      'dashboard.noProfilesAdjustSearch': 'Điều chỉnh từ khóa tìm kiếm của mày.',
-      'dashboard.noProfilesGetStarted': 'Bắt đầu bằng cách thêm một hồ sơ mới.',
-      'dashboard.editDialogTitle': 'Chỉnh sửa hồ sơ',
-      'dashboard.addDialogTitle': 'Thêm hồ sơ mới',
-      'dashboard.toastUpdateTitle': 'Cập nhật thành công',
-      'dashboard.toastUpdateDescription': 'Hồ sơ đã được cập nhật.',
-      'dashboard.toastAddTitle': 'Thêm thành công',
-      'dashboard.toastAddDescription': 'Hồ sơ mới đã được thêm.',
-      'dashboard.toastDeleteTitle': 'Đã xóa',
-      'dashboard.toastDeleteDescription': 'Hồ sơ đã được xóa thành công.',
-      'dashboard.deleteDialogTitle': 'Mày có chắc chắn không?',
-      'dashboard.deleteDialogDescription': 'Hành động này không thể hoàn tác. Việc này sẽ xóa vĩnh viễn hồ sơ này.',
-      'dashboard.deleteDialogCancel': 'Hủy',
-      'dashboard.deleteDialogConfirm': 'Xác nhận xóa',
+      
+      'individualManagement.loading': 'Đang tải hồ sơ...',
+      'individualManagement.createSuccessTitle': 'Thành công',
+      'individualManagement.createSuccessDescription': 'Hồ sơ đã được tạo thành công',
+      'individualManagement.createErrorTitle': 'Lỗi',
+      'individualManagement.createErrorDescription': 'Không thể tạo hồ sơ',
+      'individualManagement.updateSuccessTitle': 'Thành công',
+      'individualManagement.updateSuccessDescription': 'Hồ sơ đã được cập nhật thành công',
+      'individualManagement.updateErrorTitle': 'Lỗi',
+      'individualManagement.updateErrorDescription': 'Không thể cập nhật hồ sơ',
+      'individualManagement.deleteSuccessTitle': 'Thành công',
+      'individualManagement.deleteSuccessDescription': 'Hồ sơ đã được xóa thành công',
+      'individualManagement.deleteErrorTitle': 'Lỗi',
+      'individualManagement.deleteErrorDescription': 'Không thể xóa hồ sơ',
+      'individualManagement.exportSuccessTitle': 'Xuất dữ liệu thành công',
+      'individualManagement.exportErrorTitle': 'Lỗi',
+      'individualManagement.exportErrorDescription': 'Không thể xuất dữ liệu',
+      'individualManagement.confirmDelete': 'Mày có chắc chắn muốn xóa hồ sơ của {{name}}?',
+      'individualManagement.nameHeader': 'Tên',
+      'individualManagement.contactInfoHeader': 'Thông tin liên hệ',
+      'individualManagement.addressHeader': 'Địa chỉ',
+      'individualManagement.notesHeader': 'Ghi chú',
+      'individualManagement.lastUpdated': 'Cập nhật lần cuối',
+      'individualManagement.actions': 'Hành động',
+      'individualManagement.noIndividualsFound': 'Không tìm thấy hồ sơ nào.',
+      'individualManagement.adjustSearch': 'Hãy thử điều chỉnh tìm kiếm của mày.',
+      'individualManagement.getStarted': 'Tạo hồ sơ đầu tiên của mày để bắt đầu.',
+      'individualManagement.exportButton': 'Xuất',
+      'individualManagement.exportingButton': 'Đang xuất...',
+      'individualManagement.filtersButton': 'Lọc',
+      'individualManagement.searchPlaceholder': 'Tìm kiếm hồ sơ...',
+      'individualManagement.addIndividualButton': 'Thêm Hồ sơ',
+      'individualManagement.editIndividualTitle': 'Chỉnh sửa Hồ sơ',
+      'individualManagement.addIndividualTitle': 'Thêm Hồ sơ Mới',
+      'individualManagement.cancelButton': 'Hủy',
+      'individualManagement.saveButton': 'Lưu thay đổi',
+      'individualManagement.addButton': 'Thêm Hồ sơ',
+      'individualManagement.updatingButton': 'Đang cập nhật...',
+      'individualManagement.creatingButton': 'Đang thêm...',
+      'individualManagement.lastUpdatedNever': 'Không bao giờ',
+      'individualManagement.hoursAgo': 'h trước',
+      'individualManagement.daysAgo': 'd trước',
+      'individualManagement.showingResults': 'Hiển thị {{count}} kết quả',
+
+      // Bản dịch cho tính năng AI
+      'individualManagement.summarizeNotesButton': 'Tóm tắt Ghi chú',
+      'individualManagement.draftMessageButton': 'Soạn Tin nhắn',
+      'individualManagement.summarizeNotesTitle': 'Tóm tắt Ghi chú về {{name}}',
+      'individualManagement.draftMessageTitle': 'Soạn Tin nhắn cho {{name}}',
+      'individualManagement.llmOutputDescription': 'Đây là kết quả được tạo bởi Gemini AI.',
+      'individualManagement.llmLoadingMessage': 'Gemini AI đang suy nghĩ...',
+      'individualManagement.llmErrorTitle': 'Lỗi AI',
+      'individualManagement.llmErrorMessage': 'Không thể tạo nội dung',
+      'individualManagement.llmErrorFallback': 'Đã xảy ra lỗi khi tạo nội dung AI. Vui lòng thử lại.',
+      'individualManagement.llmNoResponse': 'Gemini AI không trả về nội dung.',
+      'individualManagement.copyButton': 'Sao chép',
+      'individualManagement.closeButton': 'Đóng',
+      'individualManagement.copySuccessTitle': 'Đã sao chép!',
+      'individualManagement.copySuccessDescription': 'Nội dung đã được sao chép vào clipboard.',
+      'individualManagement.noSpecificNotes': 'Không có ghi chú cụ thể nào.',
+      'individualManagement.summarizeNotesPrompt': 'Tóm tắt ngắn gọn các ghi chú sau về {{name}}: {{notes}}',
+      'individualManagement.draftMessagePrompt': 'Soạn một tin nhắn/email ngắn gọn, thân thiện gửi cho {{name}} dựa trên thông tin sau: {{notes}}. Bắt đầu bằng "Xin chào {{name}}," và kết thúc bằng "Trân trọng,".',
+
+      // Bản dịch cho AccountManagement
+      'accountManagement.loading': 'Đang tải tài khoản...',
+      'accountManagement.deleteSuccessTitle': 'Thành công',
+      'accountManagement.deleteSuccessDescription': 'Tài khoản đã được xóa thành công',
+      'accountManagement.deleteErrorTitle': 'Lỗi',
+      'accountManagement.deleteErrorDescription': 'Không thể xóa tài khoản',
+      'accountManagement.confirmDelete': 'Mày có chắc chắn muốn xóa tài khoản {{email}}?',
+      'accountManagement.lastUpdated': 'Cập nhật lần cuối',
+      'accountManagement.actions': 'Hành động',
+      'accountManagement.noAccountsFound': 'Không tìm thấy tài khoản nào.',
+      'accountManagement.adjustSearch': 'Hãy thử điều chỉnh tìm kiếm của mày.',
+      'accountManagement.getStarted': 'Đăng ký tài khoản đầu tiên của mày để bắt đầu.',
+      'accountManagement.filtersButton': 'Lọc',
+      'accountManagement.searchPlaceholder': 'Tìm kiếm tài khoản...',
+      'accountManagement.hoursAgo': 'h trước',
+      'accountManagement.daysAgo': 'd trước',
+      'accountManagement.lastUpdatedNever': 'Không bao giờ',
+      'accountManagement.showingResults': 'Hiển thị {{count}} kết quả',
     };
-    return translations[key] || key; // Trả về bản dịch nếu có, không thì trả về key
+
+    let translatedText = translations[key] || key;
+
+    if (options) {
+      for (const optionKey in options) {
+        if (options.hasOwnProperty(optionKey)) {
+          translatedText = translatedText.replace(new RegExp(`\\{\\{${optionKey}\\}\\}`, 'g'), options[optionKey]);
+        }
+      }
+    }
+    return translatedText;
   };
 
   return (

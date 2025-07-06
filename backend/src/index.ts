@@ -14,15 +14,14 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 // Cấu hình CORS
-// Để cho phép frontend truy cập từ một miền khác.
-// Trong phát triển, 'http://localhost:5173' là phổ biến cho Vite/React.
+// Để cho phép frontend truy cập từ bất kỳ miền nào trong môi trường dev
 const corsOptions = {
-  origin: 'http://localhost:5173', // Thay đổi nếu frontend của bạn chạy ở cổng khác hoặc miền khác
+  origin: '*', // <-- ĐÃ SỬA: Cho phép tất cả các nguồn (chỉ dùng trong dev)
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   credentials: true,
   optionsSuccessStatus: 204,
 };
-app.use(cors(corsOptions)); // <-- ĐÃ ĐỔI: Dùng corsOptions cụ thể hơn
+app.use(cors(corsOptions));
 
 app.use(express.json()); // Cho phép đọc JSON từ request body
 
