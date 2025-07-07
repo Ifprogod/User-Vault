@@ -2,7 +2,7 @@
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { getDb } from '../db/db'; // <-- Đã đổi thành getDb
+import { getDb } from '../db/db';
 import { users as usersTable } from '../db/schema';
 import { eq } from 'drizzle-orm';
 import dotenv from 'dotenv';
@@ -19,8 +19,8 @@ if (!JWT_SECRET) {
 // Route đăng ký người dùng
 router.post('/register', async (req, res) => {
   try {
-    const db = await getDb(); // <-- Gọi hàm getDb
-    const { name, email, password } = req.body;
+    const db = await getDb();
+    const { name, email, password } = req.body; // 'name' ở đây
 
     if (!name || !email || !password) {
       return res.status(400).json({ message: 'Tên, email và mật khẩu là bắt buộc.' });
@@ -37,11 +37,11 @@ router.post('/register', async (req, res) => {
 
     // Tạo người dùng mới
     const newUser = {
-     username: name,
-     email,
-     passwordHash: hashedPassword,
-     createdAt: new Date(),
-     updatedAt: new Date(),
+      name: name, // <-- ĐÃ SỬA: Gán giá trị của 'name' vào thuộc tính 'name' để khớp với schema
+      email,
+      passwordHash: hashedPassword,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     };
 
     const result = await db.insert(usersTable).values(newUser).returning();
@@ -53,7 +53,7 @@ router.post('/register', async (req, res) => {
     res.status(201).json({
       message: 'Đăng ký thành công!',
       token,
-      user: { id: user.id, username: user.name, email: user.email },
+      user: { id: user.id, username: user.name, email: user.email }, // Sử dụng user.name từ kết quả trả về
     });
   } catch (error) {
     console.error('Lỗi đăng ký người dùng:', error);
@@ -64,7 +64,7 @@ router.post('/register', async (req, res) => {
 // Route đăng nhập người dùng
 router.post('/login', async (req, res) => {
   try {
-    const db = await getDb(); // <-- Gọi hàm getDb
+    const db = await getDb();
     const { email, password } = req.body;
 
     if (!email || !password) {
@@ -86,12 +86,12 @@ router.post('/login', async (req, res) => {
     }
 
     // Tạo JWT
-    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '30d' });
 
     res.json({
       message: 'Đăng nhập thành công!',
       token,
-      user: { id: user.id, username: user.name, email: user.email },
+      user: { id: user.id, username: user.name, email: user.email }, // Sử dụng user.name từ user tìm được
     });
   } catch (error) {
     console.error('Lỗi đăng nhập người dùng:', error);

@@ -6,7 +6,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"; // Thêm AvatarImage
 import { 
   Search, 
   Plus, 
@@ -16,16 +16,16 @@ import {
   Download, 
   Filter,
   User,
-  Sparkles, // Icon cho AI
-  MessageSquare, // Icon cho soạn tin nhắn
-  ClipboardCopy // Icon cho copy
+  Sparkles,
+  MessageSquare,
+  ClipboardCopy
 } from "lucide-react";
 import { IndividualForm } from "./IndividualForm";
 import { IndividualProfile, InsertIndividualProfile, UpdateIndividualProfile } from '@/lib/types';
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/contexts/language-context";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"; // Import Dialog components
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 export function IndividualManagement() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -33,7 +33,6 @@ export function IndividualManagement() {
   const [showIndividualForm, setShowIndividualForm] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   
-  // State cho tính năng AI
   const [showLlmOutputModal, setShowLlmOutputModal] = useState(false);
   const [llmOutputTitle, setLlmOutputTitle] = useState("");
   const [llmOutputContent, setLlmOutputContent] = useState("");
@@ -251,7 +250,6 @@ export function IndividualManagement() {
   };
 
   const handleCopyToClipboard = () => {
-    document.execCommand('copy'); // Sử dụng document.execCommand để tương thích với iframe
     const textarea = document.createElement('textarea');
     textarea.value = llmOutputContent;
     document.body.appendChild(textarea);
@@ -328,6 +326,11 @@ export function IndividualManagement() {
                   <th className="text-left p-4 text-sm font-medium text-gray-400">{t('individualManagement.contactInfoHeader')}</th>
                   <th className="text-left p-4 text-sm font-medium text-gray-400">{t('individualManagement.addressHeader')}</th>
                   <th className="text-left p-4 text-sm font-medium text-gray-400">{t('individualManagement.notesHeader')}</th>
+                  <th className="text-left p-4 text-sm font-medium text-gray-400">{t('individualManagement.ageHeader')}</th> {/* THÊM CỘT */}
+                  <th className="text-left p-4 text-sm font-medium text-gray-400">{t('individualManagement.dobHeader')}</th> {/* THÊM CỘT */}
+                  <th className="text-left p-4 text-sm font-medium text-gray-400">{t('individualManagement.relationshipStatusHeader')}</th> {/* THÊM CỘT */}
+                  <th className="text-left p-4 text-sm font-medium text-gray-400">{t('individualManagement.cityHeader')}</th> {/* THÊM CỘT */}
+                  <th className="text-left p-4 text-sm font-medium text-gray-400">{t('individualManagement.countryHeader')}</th> {/* THÊM CỘT */}
                   <th className="text-left p-4 text-sm font-medium text-gray-400">{t('individualManagement.lastUpdated')}</th>
                   <th className="text-left p-4 text-sm font-medium text-gray-400">{t('individualManagement.actions')}</th>
                 </tr>
@@ -335,7 +338,7 @@ export function IndividualManagement() {
               <tbody className="divide-y divide-gray-700 bg-gray-900">
                 {individuals.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="p-8 text-center text-gray-400">
+                    <td colSpan={11} className="p-8 text-center text-gray-400"> {/* Cập nhật colspan */}
                       {t('individualManagement.noIndividualsFound')} {searchQuery ? t('individualManagement.adjustSearch') : t('individualManagement.getStarted')}
                     </td>
                   </tr>
@@ -345,9 +348,13 @@ export function IndividualManagement() {
                       <td className="p-4">
                         <div className="flex items-center space-x-3">
                           <Avatar className="w-10 h-10 bg-gray-700">
-                            <AvatarFallback>
-                              <User size={16} className="text-gray-300" />
-                            </AvatarFallback>
+                            {individual.profileImageUrl ? (
+                              <AvatarImage src={individual.profileImageUrl} alt={individual.name} />
+                            ) : (
+                              <AvatarFallback>
+                                <User size={16} className="text-gray-300" />
+                              </AvatarFallback>
+                            )}
                           </Avatar>
                           <div>
                             <p className="font-medium text-white">{individual.name}</p>
@@ -368,7 +375,6 @@ export function IndividualManagement() {
                       <td className="p-4">
                         <div className="text-sm">
                           <p className="text-gray-400">{individual.notes || 'Không có ghi chú'}</p>
-                          {/* Nút tóm tắt ghi chú */}
                           {individual.notes && (
                             <Button 
                               variant="ghost" 
@@ -380,6 +386,31 @@ export function IndividualManagement() {
                               <Sparkles className="mr-1" size={14} /> {t('individualManagement.summarizeNotesButton')}
                             </Button>
                           )}
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        <div className="text-sm">
+                          <p className="text-white">{individual.age || 'N/A'}</p> {/* HIỂN THỊ CỘT */}
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        <div className="text-sm">
+                          <p className="text-white">{individual.dateOfBirth || 'N/A'}</p> {/* HIỂN THỊ CỘT */}
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        <div className="text-sm">
+                          <p className="text-white">{individual.relationshipStatus || 'N/A'}</p> {/* HIỂN THỊ CỘT */}
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        <div className="text-sm">
+                          <p className="text-white">{individual.city || 'N/A'}</p> {/* HIỂN THỊ CỘT */}
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        <div className="text-sm">
+                          <p className="text-white">{individual.country || 'N/A'}</p> {/* HIỂN THỊ CỘT */}
                         </div>
                       </td>
                       <td className="p-4">
@@ -413,7 +444,6 @@ export function IndividualManagement() {
                           >
                             <Trash2 size={16} />
                           </Button>
-                          {/* Nút soạn tin nhắn/email */}
                           <Button 
                             variant="ghost" 
                             size="sm" 
@@ -445,16 +475,18 @@ export function IndividualManagement() {
 
       {/* Individual Form Modal */}
       {showIndividualForm && (
-        <IndividualForm
-          individual={selectedIndividual || undefined}
-          onSubmit={handleSubmitIndividual}
-          onCancel={() => {
-            setShowIndividualForm(false);
-            setSelectedIndividual(null);
-            setIsCreating(false);
-          }}
-          isLoading={createIndividualMutation.isPending || updateIndividualMutation.isPending}
-        />
+        <Dialog open={showIndividualForm} onOpenChange={setShowIndividualForm}>
+          <IndividualForm
+            individual={selectedIndividual || undefined}
+            onSubmit={handleSubmitIndividual}
+            onCancel={() => {
+              setShowIndividualForm(false);
+              setSelectedIndividual(null);
+              setIsCreating(false);
+            }}
+            isLoading={createIndividualMutation.isPending || updateIndividualMutation.isPending}
+          />
+        </Dialog>
       )}
 
       {/* LLM Output Modal */}

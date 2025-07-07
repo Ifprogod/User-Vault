@@ -1,7 +1,7 @@
 // src/routes/individuals.ts
 import { Router } from 'express';
 import { getDb } from '../db/db';
-import { individuals as individualsTable } from '../db/schema'; // Import bảng individuals
+import { individuals as individualsTable } from '../db/schema';
 import { eq, like, or } from 'drizzle-orm';
 import { authenticateToken } from '../middleware/auth';
 
@@ -21,7 +21,9 @@ router.get('/individuals', async (req, res) => {
       individuals = await db.select().from(individualsTable).where(
         or(
           like(individualsTable.name, `%${search}%`),
-          like(individualsTable.contactInfo, `%${search}%`)
+          like(individualsTable.contactInfo, `%${search}%`),
+          like(individualsTable.address, `%${search}%`), // Thêm tìm kiếm theo address
+          like(individualsTable.notes, `%${search}%`)    // Thêm tìm kiếm theo notes
         )
       );
     } else {
@@ -59,24 +61,25 @@ router.get('/individuals/:id', async (req, res) => {
 router.post('/individuals', async (req, res) => {
   try {
     const db = await getDb();
-    const { name, contactInfo, address, notes, userId } = req.body; // userId là để liên kết với tài khoản user nếu cần
+    // Lấy tất cả các trường từ body để khớp với schema mới
+    const { name, contactInfo, address, notes, age, dateOfBirth, relationshipStatus, city, country, profileImageUrl, userId } = req.body;
 
     if (!name || !contactInfo) {
       return res.status(400).json({ message: 'Tên và thông tin liên hệ là bắt buộc.' });
     }
-
-    // Tùy chọn: Kiểm tra xem userId có hợp lệ không nếu bạn muốn liên kết individuals với users
-    // const userExists = await db.select().from(usersTable).where(eq(usersTable.id, userId)).limit(1);
-    // if (userId && userExists.length === 0) {
-    //   return res.status(400).json({ message: 'UserId không hợp lệ.' });
-    // }
 
     const newIndividual = {
       name,
       contactInfo,
       address: address || null,
       notes: notes || null,
-      userId: userId || null, // Liên kết với userId nếu có
+      age: age || null,
+      dateOfBirth: dateOfBirth || null,
+      relationshipStatus: relationshipStatus || null,
+      city: city || null,
+      country: country || null,
+      profileImageUrl: profileImageUrl || null,
+      userId: userId || null,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -98,16 +101,25 @@ router.put('/individuals/:id', async (req, res) => {
       return res.status(400).json({ message: 'ID individual không hợp lệ.' });
     }
 
-    const { name, contactInfo, address, notes, userId } = req.body;
+    // Lấy tất cả các trường từ body để khớp với schema mới
+    const { name, contactInfo, address, notes, age, dateOfBirth, relationshipStatus, city, country, profileImageUrl, userId } = req.body;
 
-    const updatedIndividual = {
-      name: name || undefined,
-      contactInfo: contactInfo || undefined,
-      address: address || undefined,
-      notes: notes || undefined,
-      userId: userId || undefined,
+    const updatedIndividual: Partial<typeof individualsTable.$inferInsert> = {
       updatedAt: new Date(),
     };
+
+    if (name !== undefined) updatedIndividual.name = name;
+    if (contactInfo !== undefined) updatedIndividual.contactInfo = contactInfo;
+    if (address !== undefined) updatedIndividual.address = address;
+    if (notes !== undefined) updatedIndividual.notes = notes;
+    if (age !== undefined) updatedIndividual.age = age;
+    if (dateOfBirth !== undefined) updatedIndividual.dateOfBirth = dateOfBirth;
+    if (relationshipStatus !== undefined) updatedIndividual.relationshipStatus = relationshipStatus;
+    if (city !== undefined) updatedIndividual.city = city;
+    if (country !== undefined) updatedIndividual.country = country;
+    if (profileImageUrl !== undefined) updatedIndividual.profileImageUrl = profileImageUrl;
+    if (userId !== undefined) updatedIndividual.userId = userId;
+
 
     const result = await db.update(individualsTable).set(updatedIndividual).where(eq(individualsTable.id, individualId)).returning();
 

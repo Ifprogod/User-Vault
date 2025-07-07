@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   Search, 
-  Plus, 
+  Plus, // Giữ lại nếu muốn thêm nút "Thêm tài khoản" thủ công sau này
   Eye, 
   Edit, 
   Trash2, 
@@ -18,16 +18,15 @@ import {
   Filter,
   User // Icon User
 } from "lucide-react";
-// import { UserForm } from "./UserForm"; // Sẽ không dùng UserForm nữa, vì nó đã thành IndividualForm
-import { UserProfile, InsertUserProfile, UpdateUserProfile } from '@/lib/types'; // Import UserProfile types
+import { UserProfile } from '@/lib/types'; // Import UserProfile types
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/contexts/language-context";
 
 export function AccountManagement() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
-  const [showUserForm, setShowUserForm] = useState(false); // Không dùng form này nữa, chỉ hiển thị
+  // const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null); // Không cần state này nếu không có form edit
+  // const [showUserForm, setShowUserForm] = useState(false); // Không cần form này nữa
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -35,7 +34,7 @@ export function AccountManagement() {
 
   // Fetch users (tài khoản)
   const { data: users = [], isLoading } = useQuery({
-    queryKey: ["/api/users", searchQuery], // <-- API endpoint cho users
+    queryKey: ["/api/users", searchQuery], // API endpoint cho users
     queryFn: async () => {
       const response = await apiRequest("GET", `/api/users${searchQuery ? `?search=${encodeURIComponent(searchQuery)}` : ""}`);
       return response.json() as Promise<UserProfile[]>;
@@ -45,7 +44,7 @@ export function AccountManagement() {
   // Delete user mutation (chỉ cho phép xóa tài khoản, không cho tạo/sửa qua giao diện này)
   const deleteUserMutation = useMutation({
     mutationFn: async (id: number) => {
-      await apiRequest("DELETE", `/api/users/${id}`); // <-- API endpoint cho users
+      await apiRequest("DELETE", `/api/users/${id}`); // API endpoint cho users
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
@@ -104,10 +103,9 @@ export function AccountManagement() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg font-semibold text-white">
-              {t('sidebar.accountManagement')} {/* <-- Tiêu đề mới */}
+              {t('sidebar.accountManagement')}
             </CardTitle>
             <div className="flex space-x-2">
-              {/* Có thể thêm nút Export/Filter nếu cần cho Account */}
               <Button size="sm" className="bg-gray-800 text-gray-300 border-gray-600 hover:bg-gray-700 hover:text-white">
                 <Filter className="mr-2" size={16} />
                 {t('accountManagement.filtersButton')}
@@ -127,7 +125,7 @@ export function AccountManagement() {
                 className="pl-10 bg-gray-800 border-gray-600 text-white placeholder:text-gray-400"
               />
             </div>
-            {/* Không có nút Thêm Tài khoản ở đây, vì việc tạo tài khoản là qua đăng ký */}
+            {/* Nút "Thêm Tài khoản" không cần thiết ở đây vì tài khoản được tạo qua đăng ký */}
             {/* <Button className="bg-blue-600 hover:bg-blue-700 text-white">
               <Plus className="mr-2" size={16} />
               {t('accountManagement.addAccountButton')}
@@ -139,9 +137,9 @@ export function AccountManagement() {
             <table className="w-full">
               <thead className="bg-gray-800">
                 <tr>
-                  <th className="text-left p-4 text-sm font-medium text-gray-400">Email</th>
-                  <th className="text-left p-4 text-sm font-medium text-gray-400">Tên</th>
-                  <th className="text-left p-4 text-sm font-medium text-gray-400">Trạng thái</th>
+                  <th className="text-left p-4 text-sm font-medium text-gray-400">{t('accountManagement.nameHeader')}</th> {/* Đã đổi header */}
+                  <th className="text-left p-4 text-sm font-medium text-gray-400">{t('accountManagement.emailHeader')}</th> {/* Đã đổi header */}
+                  <th className="text-left p-4 text-sm font-medium text-gray-400">{t('accountManagement.statusHeader')}</th> {/* Đã đổi header */}
                   <th className="text-left p-4 text-sm font-medium text-gray-400">{t('accountManagement.lastUpdated')}</th>
                   <th className="text-left p-4 text-sm font-medium text-gray-400">{t('accountManagement.actions')}</th>
                 </tr>
@@ -168,14 +166,13 @@ export function AccountManagement() {
                             )}
                           </Avatar>
                           <div>
-                            <p className="font-medium text-white">{user.email}</p>
-                            <p className="text-sm text-gray-400">{user.name}</p>
+                            <p className="font-medium text-white">{user.name}</p> {/* Hiển thị tên */}
                           </div>
                         </div>
                       </td>
                       <td className="p-4">
                         <div className="text-sm">
-                          <p className="text-white">{user.name}</p>
+                          <p className="text-white">{user.email}</p> {/* Hiển thị email */}
                         </div>
                       </td>
                       <td className="p-4">
@@ -190,7 +187,7 @@ export function AccountManagement() {
                       </td>
                       <td className="p-4">
                         <div className="flex space-x-2">
-                          {/* Không có nút Edit/View ở đây, vì quản lý tài khoản là khác */}
+                          {/* Không có nút Edit/View ở đây cho tài khoản */}
                           <Button
                             variant="ghost"
                             size="sm"

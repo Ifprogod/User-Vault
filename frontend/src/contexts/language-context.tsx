@@ -2,7 +2,7 @@
 import React, { createContext, useContext, ReactNode } from 'react';
 
 interface LanguageContextType {
-  t: (key: string, options?: { [key: string]: any }) => string; // Hàm dịch (tạm thời chỉ trả về key)
+  t: (key: string, options?: { [key: string]: any }) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -12,7 +12,7 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
     const translations: { [key: string]: string } = {
       'sidebar.dashboard': 'Dashboard',
       'sidebar.individualProfiles': 'Quản lý Hồ sơ',
-      'sidebar.accountManagement': 'Quản lý Tài khoản', // <-- THÊM DÒNG NÀY
+      'sidebar.accountManagement': 'Quản lý Tài khoản',
       'sidebar.settings': 'Cài đặt',
       'sidebar.logout': 'Đăng xuất',
       'logout.toast.title': 'Đã đăng xuất',
@@ -39,6 +39,11 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
       'individualManagement.contactInfoHeader': 'Thông tin liên hệ',
       'individualManagement.addressHeader': 'Địa chỉ',
       'individualManagement.notesHeader': 'Ghi chú',
+      'individualManagement.ageHeader': 'Tuổi', // THÊM DÒNG NÀY
+      'individualManagement.dobHeader': 'Ngày sinh', // THÊM DÒNG NÀY
+      'individualManagement.relationshipStatusHeader': 'Tình trạng quan hệ', // THÊM DÒNG NÀY
+      'individualManagement.cityHeader': 'Thành phố', // THÊM DÒNG NÀY
+      'individualManagement.countryHeader': 'Quốc gia', // THÊM DÒNG NÀY
       'individualManagement.lastUpdated': 'Cập nhật lần cuối',
       'individualManagement.actions': 'Hành động',
       'individualManagement.noIndividualsFound': 'Không tìm thấy hồ sơ nào.',
@@ -98,6 +103,9 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
       'accountManagement.daysAgo': 'd trước',
       'accountManagement.lastUpdatedNever': 'Không bao giờ',
       'accountManagement.showingResults': 'Hiển thị {{count}} kết quả',
+      'accountManagement.nameHeader': 'Tên',
+      'accountManagement.emailHeader': 'Email',
+      'accountManagement.statusHeader': 'Trạng thái',
     };
 
     let translatedText = translations[key] || key;

@@ -8,11 +8,12 @@ import { ToastProvider } from './hooks/use-toast';
 import { LanguageProvider } from './contexts/language-context';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-// Khởi tạo QueryClient với defaultOptions để cấu hình staleTime
+// Khởi tạo QueryClient với defaultOptions để cấu hình staleTime và gcTime
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5, // Dữ liệu được coi là "tươi" trong 5 phút (5 * 60 * 1000 ms)
+      staleTime: 1000 * 60 * 10, // Dữ liệu được coi là "tươi" trong 10 phút
+      gcTime: 1000 * 60 * 30,   // Dữ liệu được giữ trong cache 30 phút sau khi không còn được sử dụng
     },
   },
 });
