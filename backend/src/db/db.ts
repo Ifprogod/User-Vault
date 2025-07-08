@@ -64,14 +64,22 @@ export async function createSchema() {
           "user_id" integer,
           "name" text NOT NULL,
           "contact_info" text NOT NULL,
-          "address" text,
-          "notes" text,
+          "profile_image_url" text,
           "age" integer,
           "date_of_birth" varchar(10),
           "relationship_status" varchar(50),
+          "trust_reputation" varchar(50),
+          "status" varchar(20) DEFAULT 'active' NOT NULL,
+          "address" text,
           "city" varchar(100),
           "country" varchar(100),
-          "profile_image_url" text,
+          "phone" varchar(20),
+          "occupation" text,
+          "bio" text,
+          "interests" text,
+          "social_media_links" text,
+          "emergency_contact" text,
+          "notes" text,
           "created_at" timestamp DEFAULT now() NOT NULL,
           "updated_at" timestamp DEFAULT now(),
           CONSTRAINT "individuals_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE
@@ -84,3 +92,4 @@ export async function createSchema() {
     throw error;
   }
 }
+

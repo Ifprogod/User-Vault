@@ -6,26 +6,27 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"; // Thêm AvatarImage
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   Search, 
   Plus, 
-  Eye, 
+  Eye, // Giữ lại icon Eye cho nút xem chi tiết
   Edit, 
   Trash2, 
   Download, 
   Filter,
   User,
-  Sparkles,
-  MessageSquare,
-  ClipboardCopy
+  Sparkles, // Icon cho AI
+  MessageSquare, // Icon cho soạn tin nhắn
+  ClipboardCopy // Icon cho copy
 } from "lucide-react";
 import { IndividualForm } from "./IndividualForm";
+import { IndividualDetailModal } from "./IndividualDetailModal"; // <-- Import modal chi tiết
 import { IndividualProfile, InsertIndividualProfile, UpdateIndividualProfile } from '@/lib/types';
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/contexts/language-context";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"; // Import Dialog components
 
 export function IndividualManagement() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -33,6 +34,11 @@ export function IndividualManagement() {
   const [showIndividualForm, setShowIndividualForm] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   
+  // State cho modal xem chi tiết
+  const [showIndividualDetailModal, setShowIndividualDetailModal] = useState(false);
+  const [selectedIndividualForDetail, setSelectedIndividualForDetail] = useState<IndividualProfile | null>(null);
+
+  // State cho tính năng AI
   const [showLlmOutputModal, setShowLlmOutputModal] = useState(false);
   const [llmOutputTitle, setLlmOutputTitle] = useState("");
   const [llmOutputContent, setLlmOutputContent] = useState("");
@@ -86,16 +92,17 @@ export function IndividualManagement() {
       queryClient.invalidateQueries({ queryKey: ["/api/individuals"] });
       setShowIndividualForm(false);
       setSelectedIndividual(null);
+      setShowIndividualDetailModal(false); // Đóng modal chi tiết sau khi cập nhật
       toast({
-        title: t('individualManagement.updateSuccessTitle'),
-        description: t('individualManagement.updateSuccessDescription'),
+        title: "Thành công",
+        description: "Hồ sơ đã được cập nhật thành công",
       });
     },
     onError: (error) => {
       console.error("Lỗi khi cập nhật hồ sơ:", error);
       toast({
-        title: t('individualManagement.updateErrorTitle'),
-        description: t('individualManagement.updateErrorDescription'),
+        title: "Lỗi",
+        description: "Không thể cập nhật hồ sơ",
         variant: "destructive",
       });
     },
@@ -123,7 +130,7 @@ export function IndividualManagement() {
     },
   });
 
-  // Export data mutation (giữ nguyên nếu bạn muốn export individuals)
+  // Export data mutation
   const exportDataMutation = useMutation({
     mutationFn: async () => {
       const response = await apiRequest("POST", "/api/google/export"); 
@@ -155,6 +162,7 @@ export function IndividualManagement() {
     setIsCreating(false);
     setSelectedIndividual(individual);
     setShowIndividualForm(true);
+    setShowIndividualDetailModal(false); // Đóng modal chi tiết nếu đang mở
   };
 
   const handleDeleteIndividual = (individual: IndividualProfile) => {
@@ -174,6 +182,12 @@ export function IndividualManagement() {
     }
   };
 
+  // Hàm mở modal chi tiết
+  const handleViewIndividualDetail = (individual: IndividualProfile) => {
+    setSelectedIndividualForDetail(individual);
+    setShowIndividualDetailModal(true);
+  };
+
   const formatTimeAgo = (date: Date | null | string) => {
     if (!date) return t('individualManagement.lastUpdatedNever');
     const now = new Date();
@@ -185,7 +199,7 @@ export function IndividualManagement() {
     return `${diffDays}${t('individualManagement.daysAgo')}`;
   };
 
-  // --- Tính năng Gemini AI ---
+  // --- Tính năng Gemini AI (được truyền vào IndividualDetailModal) ---
   const callGeminiApi = async (prompt: string): Promise<string> => {
     setIsLlmLoading(true);
     setLlmOutputContent(t('individualManagement.llmLoadingMessage'));
@@ -317,154 +331,60 @@ export function IndividualManagement() {
             </Button>
           </div>
 
-          {/* Individuals Table */}
-          <div className="overflow-x-auto rounded-lg border border-gray-700">
-            <table className="w-full">
-              <thead className="bg-gray-800">
-                <tr>
-                  <th className="text-left p-4 text-sm font-medium text-gray-400">{t('individualManagement.nameHeader')}</th>
-                  <th className="text-left p-4 text-sm font-medium text-gray-400">{t('individualManagement.contactInfoHeader')}</th>
-                  <th className="text-left p-4 text-sm font-medium text-gray-400">{t('individualManagement.addressHeader')}</th>
-                  <th className="text-left p-4 text-sm font-medium text-gray-400">{t('individualManagement.notesHeader')}</th>
-                  <th className="text-left p-4 text-sm font-medium text-gray-400">{t('individualManagement.ageHeader')}</th> {/* THÊM CỘT */}
-                  <th className="text-left p-4 text-sm font-medium text-gray-400">{t('individualManagement.dobHeader')}</th> {/* THÊM CỘT */}
-                  <th className="text-left p-4 text-sm font-medium text-gray-400">{t('individualManagement.relationshipStatusHeader')}</th> {/* THÊM CỘT */}
-                  <th className="text-left p-4 text-sm font-medium text-gray-400">{t('individualManagement.cityHeader')}</th> {/* THÊM CỘT */}
-                  <th className="text-left p-4 text-sm font-medium text-gray-400">{t('individualManagement.countryHeader')}</th> {/* THÊM CỘT */}
-                  <th className="text-left p-4 text-sm font-medium text-gray-400">{t('individualManagement.lastUpdated')}</th>
-                  <th className="text-left p-4 text-sm font-medium text-gray-400">{t('individualManagement.actions')}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-700 bg-gray-900">
-                {individuals.length === 0 ? (
-                  <tr>
-                    <td colSpan={11} className="p-8 text-center text-gray-400"> {/* Cập nhật colspan */}
-                      {t('individualManagement.noIndividualsFound')} {searchQuery ? t('individualManagement.adjustSearch') : t('individualManagement.getStarted')}
-                    </td>
-                  </tr>
-                ) : (
-                  individuals.map((individual) => (
-                    <tr key={individual.id} className="hover:bg-gray-800 transition-colors">
-                      <td className="p-4">
-                        <div className="flex items-center space-x-3">
-                          <Avatar className="w-10 h-10 bg-gray-700">
-                            {individual.profileImageUrl ? (
-                              <AvatarImage src={individual.profileImageUrl} alt={individual.name} />
-                            ) : (
-                              <AvatarFallback>
-                                <User size={16} className="text-gray-300" />
-                              </AvatarFallback>
-                            )}
-                          </Avatar>
-                          <div>
-                            <p className="font-medium text-white">{individual.name}</p>
-                            <p className="text-sm text-gray-400">{individual.contactInfo}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <div className="text-sm">
-                          <p className="text-white">{individual.contactInfo}</p>
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <div className="text-sm">
-                          <p className="text-white">{individual.address || 'N/A'}</p>
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <div className="text-sm">
-                          <p className="text-gray-400">{individual.notes || 'Không có ghi chú'}</p>
-                          {individual.notes && (
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="text-blue-400 hover:bg-gray-700 hover:text-blue-300 mt-1"
-                              onClick={() => handleSummarizeNotes(individual)}
-                              disabled={isLlmLoading}
-                            >
-                              <Sparkles className="mr-1" size={14} /> {t('individualManagement.summarizeNotesButton')}
-                            </Button>
-                          )}
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <div className="text-sm">
-                          <p className="text-white">{individual.age || 'N/A'}</p> {/* HIỂN THỊ CỘT */}
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <div className="text-sm">
-                          <p className="text-white">{individual.dateOfBirth || 'N/A'}</p> {/* HIỂN THỊ CỘT */}
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <div className="text-sm">
-                          <p className="text-white">{individual.relationshipStatus || 'N/A'}</p> {/* HIỂN THỊ CỘT */}
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <div className="text-sm">
-                          <p className="text-white">{individual.city || 'N/A'}</p> {/* HIỂN THỊ CỘT */}
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <div className="text-sm">
-                          <p className="text-white">{individual.country || 'N/A'}</p> {/* HIỂN THỊ CỘT */}
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <p className="text-sm text-gray-400">
-                          {formatTimeAgo(individual.updatedAt)}
-                        </p>
-                      </td>
-                      <td className="p-4">
-                        <div className="flex space-x-2">
-                          <Button
+          {/* Individuals List (Card-based display) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {individuals.length === 0 ? (
+              <div className="col-span-full p-8 text-center text-gray-400">
+                {t('individualManagement.noIndividualsFound')} {searchQuery ? t('individualManagement.adjustSearch') : t('individualManagement.getStarted')}
+              </div>
+            ) : (
+              individuals.map((individual) => (
+                <Card 
+                  key={individual.id} 
+                  className="bg-gray-800 border-gray-700 hover:bg-gray-700 transition-colors cursor-pointer"
+                  onClick={() => handleViewIndividualDetail(individual)} // Click vào card để xem chi tiết
+                >
+                  <CardContent className="p-4 flex items-center space-x-4">
+                    <Avatar className="w-12 h-12 bg-gray-700">
+                      {individual.profileImageUrl ? (
+                        <AvatarImage src={individual.profileImageUrl} alt={individual.name} />
+                      ) : (
+                        <AvatarFallback>
+                          <User size={20} className="text-gray-300" />
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
+                    <div className="flex-1">
+                      <p className="font-medium text-white text-lg">{individual.name}</p>
+                      <p className="text-sm text-gray-400">{individual.contactInfo}</p>
+                    </div>
+                    <div className="flex space-x-2">
+                        <Button
                             variant="ghost"
-                            size="sm"
-                            onClick={() => handleEditIndividual(individual)}
-                            className="text-gray-300 hover:bg-gray-700 hover:text-white"
-                          >
-                            <Eye size={16} />
-                          </Button>
-                          <Button
+                            size="icon"
+                            onClick={(e) => { e.stopPropagation(); handleViewIndividualDetail(individual); }} // Ngăn chặn sự kiện click lan truyền
+                            className="text-gray-300 hover:bg-gray-600 hover:text-white"
+                        >
+                            <Eye size={18} />
+                        </Button>
+                        <Button
                             variant="ghost"
-                            size="sm"
-                            onClick={() => handleEditIndividual(individual)}
-                            className="text-gray-300 hover:bg-gray-700 hover:text-white"
-                          >
-                            <Edit size={16} />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDeleteIndividual(individual)}
+                            size="icon"
+                            onClick={(e) => { e.stopPropagation(); handleDeleteIndividual(individual); }} // Ngăn chặn sự kiện click lan truyền
                             className="text-red-500 hover:bg-red-900 hover:text-red-400"
-                          >
-                            <Trash2 size={16} />
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="text-purple-400 hover:bg-gray-700 hover:text-purple-300"
-                            onClick={() => handleDraftMessage(individual)}
-                            disabled={isLlmLoading}
-                          >
-                            <MessageSquare className="mr-1" size={14} /> {t('individualManagement.draftMessageButton')}
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                        >
+                            <Trash2 size={18} />
+                        </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
           </div>
 
-          {/* Pagination */}
+          {/* Pagination (giữ nguyên hoặc tùy chỉnh nếu cần) */}
           {individuals.length > 0 && (
-            <div className="flex items-center justify-between pt-6 border-t border-gray-700">
+            <div className="flex items-center justify-between pt-6 border-t border-gray-700 mt-6">
               <div className="text-sm text-gray-400">
                 {t('individualManagement.showingResults', { count: individuals.length })}
               </div>
@@ -473,7 +393,7 @@ export function IndividualManagement() {
         </CardContent>
       </Card>
 
-      {/* Individual Form Modal */}
+      {/* Individual Form Modal (cho Thêm/Sửa) */}
       {showIndividualForm && (
         <Dialog open={showIndividualForm} onOpenChange={setShowIndividualForm}>
           <IndividualForm
@@ -489,32 +409,30 @@ export function IndividualManagement() {
         </Dialog>
       )}
 
-      {/* LLM Output Modal */}
-      {showLlmOutputModal && (
-        <Dialog open={showLlmOutputModal} onOpenChange={setShowLlmOutputModal}>
-          <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>{llmOutputTitle}</DialogTitle>
-              <DialogDescription className="text-gray-400">
-                {t('individualManagement.llmOutputDescription')}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="p-4 bg-gray-800 rounded-lg text-white whitespace-pre-wrap break-words">
-              {isLlmLoading ? t('individualManagement.llmLoadingMessage') : llmOutputContent}
-            </div>
-            <DialogFooter>
-              <Button 
-                onClick={handleCopyToClipboard} 
-                disabled={isLlmLoading || !llmOutputContent}
-                className="bg-gray-700 hover:bg-gray-600 text-white"
-              >
-                <ClipboardCopy className="mr-2" size={16} /> {t('individualManagement.copyButton')}
-              </Button>
-              <Button onClick={() => setShowLlmOutputModal(false)}>{t('individualManagement.closeButton')}</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+      {/* Individual Detail Modal (cho Xem chi tiết) */}
+      {showIndividualDetailModal && selectedIndividualForDetail && (
+        <IndividualDetailModal
+          individual={selectedIndividualForDetail}
+          onClose={() => {
+            setShowIndividualDetailModal(false);
+            setSelectedIndividualForDetail(null);
+          }}
+          onEdit={handleEditIndividual}
+          onSummarizeNotes={handleSummarizeNotes}
+          onDraftMessage={handleDraftMessage}
+          isLlmLoading={isLlmLoading}
+          llmOutputContent={llmOutputContent}
+          llmOutputTitle={llmOutputTitle}
+          showLlmOutputModal={showLlmOutputModal}
+          setShowLlmOutputModal={setShowLlmOutputModal}
+          handleCopyToClipboard={handleCopyToClipboard}
+        />
       )}
+
+      {/* LLM Output Modal (được quản lý bởi IndividualDetailModal nhưng vẫn cần ở đây nếu muốn tách riêng) */}
+      {/* Vẫn giữ ở đây để đảm bảo LLM modal hoạt động độc lập nếu cần, nhưng sẽ được kích hoạt từ DetailModal */}
+      {/* showLlmOutputModal được quản lý bởi IndividualDetailModal, nên không cần Dialog riêng ở đây nữa */}
     </div>
   );
 }
+

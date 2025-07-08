@@ -1,136 +1,93 @@
 // src/contexts/language-context.tsx
-import React, { createContext, useContext, ReactNode } from 'react';
+'use client';
 
-interface LanguageContextType {
-  t: (key: string, options?: { [key: string]: any }) => string;
-}
+import * as React from 'react';
+import en from '@/lib/locales/en.json'; // Import tiếng Anh
+import vi from '@/lib/locales/vi.json'; // Import tiếng Việt
 
-const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+type Language = 'en' | 'vi';
 
-export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const t = (key: string, options?: { [key: string]: any }) => {
-    const translations: { [key: string]: string } = {
-      'sidebar.dashboard': 'Dashboard',
-      'sidebar.individualProfiles': 'Quản lý Hồ sơ',
-      'sidebar.accountManagement': 'Quản lý Tài khoản',
-      'sidebar.settings': 'Cài đặt',
-      'sidebar.logout': 'Đăng xuất',
-      'logout.toast.title': 'Đã đăng xuất',
-      'logout.toast.description': 'Mày đã đăng xuất thành công.',
-      
-      'individualManagement.loading': 'Đang tải hồ sơ...',
-      'individualManagement.createSuccessTitle': 'Thành công',
-      'individualManagement.createSuccessDescription': 'Hồ sơ đã được tạo thành công',
-      'individualManagement.createErrorTitle': 'Lỗi',
-      'individualManagement.createErrorDescription': 'Không thể tạo hồ sơ',
-      'individualManagement.updateSuccessTitle': 'Thành công',
-      'individualManagement.updateSuccessDescription': 'Hồ sơ đã được cập nhật thành công',
-      'individualManagement.updateErrorTitle': 'Lỗi',
-      'individualManagement.updateErrorDescription': 'Không thể cập nhật hồ sơ',
-      'individualManagement.deleteSuccessTitle': 'Thành công',
-      'individualManagement.deleteSuccessDescription': 'Hồ sơ đã được xóa thành công',
-      'individualManagement.deleteErrorTitle': 'Lỗi',
-      'individualManagement.deleteErrorDescription': 'Không thể xóa hồ sơ',
-      'individualManagement.exportSuccessTitle': 'Xuất dữ liệu thành công',
-      'individualManagement.exportErrorTitle': 'Lỗi',
-      'individualManagement.exportErrorDescription': 'Không thể xuất dữ liệu',
-      'individualManagement.confirmDelete': 'Mày có chắc chắn muốn xóa hồ sơ của {{name}}?',
-      'individualManagement.nameHeader': 'Tên',
-      'individualManagement.contactInfoHeader': 'Thông tin liên hệ',
-      'individualManagement.addressHeader': 'Địa chỉ',
-      'individualManagement.notesHeader': 'Ghi chú',
-      'individualManagement.ageHeader': 'Tuổi', // THÊM DÒNG NÀY
-      'individualManagement.dobHeader': 'Ngày sinh', // THÊM DÒNG NÀY
-      'individualManagement.relationshipStatusHeader': 'Tình trạng quan hệ', // THÊM DÒNG NÀY
-      'individualManagement.cityHeader': 'Thành phố', // THÊM DÒNG NÀY
-      'individualManagement.countryHeader': 'Quốc gia', // THÊM DÒNG NÀY
-      'individualManagement.lastUpdated': 'Cập nhật lần cuối',
-      'individualManagement.actions': 'Hành động',
-      'individualManagement.noIndividualsFound': 'Không tìm thấy hồ sơ nào.',
-      'individualManagement.adjustSearch': 'Hãy thử điều chỉnh tìm kiếm của mày.',
-      'individualManagement.getStarted': 'Tạo hồ sơ đầu tiên của mày để bắt đầu.',
-      'individualManagement.exportButton': 'Xuất',
-      'individualManagement.exportingButton': 'Đang xuất...',
-      'individualManagement.filtersButton': 'Lọc',
-      'individualManagement.searchPlaceholder': 'Tìm kiếm hồ sơ...',
-      'individualManagement.addIndividualButton': 'Thêm Hồ sơ',
-      'individualManagement.editIndividualTitle': 'Chỉnh sửa Hồ sơ',
-      'individualManagement.addIndividualTitle': 'Thêm Hồ sơ Mới',
-      'individualManagement.cancelButton': 'Hủy',
-      'individualManagement.saveButton': 'Lưu thay đổi',
-      'individualManagement.addButton': 'Thêm Hồ sơ',
-      'individualManagement.updatingButton': 'Đang cập nhật...',
-      'individualManagement.creatingButton': 'Đang thêm...',
-      'individualManagement.lastUpdatedNever': 'Không bao giờ',
-      'individualManagement.hoursAgo': 'h trước',
-      'individualManagement.daysAgo': 'd trước',
-      'individualManagement.showingResults': 'Hiển thị {{count}} kết quả',
+type LanguageContextType = {
+    language: Language;
+    setLanguage: (language: Language) => void;
+    t: (key: string, options?: { [key: string]: any }) => string; // Thêm options cho bản dịch có biến
+};
 
-      // Bản dịch cho tính năng AI
-      'individualManagement.summarizeNotesButton': 'Tóm tắt Ghi chú',
-      'individualManagement.draftMessageButton': 'Soạn Tin nhắn',
-      'individualManagement.summarizeNotesTitle': 'Tóm tắt Ghi chú về {{name}}',
-      'individualManagement.draftMessageTitle': 'Soạn Tin nhắn cho {{name}}',
-      'individualManagement.llmOutputDescription': 'Đây là kết quả được tạo bởi Gemini AI.',
-      'individualManagement.llmLoadingMessage': 'Gemini AI đang suy nghĩ...',
-      'individualManagement.llmErrorTitle': 'Lỗi AI',
-      'individualManagement.llmErrorMessage': 'Không thể tạo nội dung',
-      'individualManagement.llmErrorFallback': 'Đã xảy ra lỗi khi tạo nội dung AI. Vui lòng thử lại.',
-      'individualManagement.llmNoResponse': 'Gemini AI không trả về nội dung.',
-      'individualManagement.copyButton': 'Sao chép',
-      'individualManagement.closeButton': 'Đóng',
-      'individualManagement.copySuccessTitle': 'Đã sao chép!',
-      'individualManagement.copySuccessDescription': 'Nội dung đã được sao chép vào clipboard.',
-      'individualManagement.noSpecificNotes': 'Không có ghi chú cụ thể nào.',
-      'individualManagement.summarizeNotesPrompt': 'Tóm tắt ngắn gọn các ghi chú sau về {{name}}: {{notes}}',
-      'individualManagement.draftMessagePrompt': 'Soạn một tin nhắn/email ngắn gọn, thân thiện gửi cho {{name}} dựa trên thông tin sau: {{notes}}. Bắt đầu bằng "Xin chào {{name}}," và kết thúc bằng "Trân trọng,".',
+const translations: Record<Language, any> = { en, vi };
 
-      // Bản dịch cho AccountManagement
-      'accountManagement.loading': 'Đang tải tài khoản...',
-      'accountManagement.deleteSuccessTitle': 'Thành công',
-      'accountManagement.deleteSuccessDescription': 'Tài khoản đã được xóa thành công',
-      'accountManagement.deleteErrorTitle': 'Lỗi',
-      'accountManagement.deleteErrorDescription': 'Không thể xóa tài khoản',
-      'accountManagement.confirmDelete': 'Mày có chắc chắn muốn xóa tài khoản {{email}}?',
-      'accountManagement.lastUpdated': 'Cập nhật lần cuối',
-      'accountManagement.actions': 'Hành động',
-      'accountManagement.noAccountsFound': 'Không tìm thấy tài khoản nào.',
-      'accountManagement.adjustSearch': 'Hãy thử điều chỉnh tìm kiếm của mày.',
-      'accountManagement.getStarted': 'Đăng ký tài khoản đầu tiên của mày để bắt đầu.',
-      'accountManagement.filtersButton': 'Lọc',
-      'accountManagement.searchPlaceholder': 'Tìm kiếm tài khoản...',
-      'accountManagement.hoursAgo': 'h trước',
-      'accountManagement.daysAgo': 'd trước',
-      'accountManagement.lastUpdatedNever': 'Không bao giờ',
-      'accountManagement.showingResults': 'Hiển thị {{count}} kết quả',
-      'accountManagement.nameHeader': 'Tên',
-      'accountManagement.emailHeader': 'Email',
-      'accountManagement.statusHeader': 'Trạng thái',
+const LanguageContext = React.createContext<LanguageContextType | undefined>(undefined);
+
+export function LanguageProvider({ children }: { children: React.ReactNode }) {
+    // Mặc định ngôn ngữ là tiếng Việt
+    const [language, setLanguage] = React.useState<Language>('vi');
+
+    const t = React.useCallback((key: string, options?: { [key: string]: any }) => {
+        const keys = key.split('.');
+        let result: any = translations[language];
+        
+        // Tìm kiếm bản dịch trong ngôn ngữ hiện tại
+        for (const k of keys) {
+            result = result?.[k];
+            if (result === undefined) {
+                // Nếu không tìm thấy, fallback về tiếng Anh
+                let fallbackResult: any = translations.en;
+                for (const fk of keys) {
+                    fallbackResult = fallbackResult?.[fk];
+                }
+                // Nếu vẫn không tìm thấy, trả về key gốc
+                let finalResult = fallbackResult || key;
+
+                // Thay thế biến trong bản dịch
+                if (options) {
+                    for (const optionKey in options) {
+                        if (options.hasOwnProperty(optionKey)) {
+                            finalResult = finalResult.replace(new RegExp(`\\{\\{${optionKey}\\}\\}`, 'g'), options[optionKey]);
+                        }
+                    }
+                }
+                return finalResult;
+            }
+        }
+        
+        // Nếu tìm thấy trong ngôn ngữ hiện tại, thay thế biến và trả về
+        let finalResult = result || key;
+        if (options) {
+            for (const optionKey in options) {
+                if (options.hasOwnProperty(optionKey)) {
+                    finalResult = finalResult.replace(new RegExp(`\\{\\{${optionKey}\\}\\}`, 'g'), options[optionKey]);
+                }
+            }
+        }
+        return finalResult;
+    }, [language]);
+
+    // Load ngôn ngữ đã lưu từ localStorage khi khởi động
+    React.useEffect(() => {
+        const savedLang = localStorage.getItem('language') as Language | null;
+        if (savedLang && ['en', 'vi'].includes(savedLang)) {
+            setLanguage(savedLang);
+        }
+    }, []);
+
+    const handleSetLanguage = (lang: Language) => {
+        setLanguage(lang);
+        localStorage.setItem('language', lang);
     };
 
-    let translatedText = translations[key] || key;
+    const value = { language, setLanguage: handleSetLanguage, t };
 
-    if (options) {
-      for (const optionKey in options) {
-        if (options.hasOwnProperty(optionKey)) {
-          translatedText = translatedText.replace(new RegExp(`\\{\\{${optionKey}\\}\\}`, 'g'), options[optionKey]);
-        }
-      }
+    return (
+        <LanguageContext.Provider value={value}>
+            {children}
+        </LanguageContext.Provider>
+    );
+}
+
+export function useTranslation() {
+    const context = React.useContext(LanguageContext);
+    if (context === undefined) {
+        throw new Error('useTranslation must be used within a LanguageProvider');
     }
-    return translatedText;
-  };
+    return context;
+}
 
-  return (
-    <LanguageContext.Provider value={{ t }}>
-      {children}
-    </LanguageContext.Provider>
-  );
-};
-
-export const useTranslation = () => {
-  const context = useContext(LanguageContext);
-  if (context === undefined) {
-    throw new Error('useTranslation must be used within a LanguageProvider');
-  }
-  return context;
-};

@@ -16,19 +16,27 @@ export type InsertUserProfile = Omit<UserProfile, 'id' | 'createdAt' | 'updatedA
 export type UpdateUserProfile = Partial<InsertUserProfile>;
 
 
-// --- KIỂU DỮ LIỆU MỚI CHO INDIVIDUALS (HỒ SƠ KHÁCH HÀNG/BẠN BÈ) - CÓ NHIỀU THÔNG TIN CHI TIẾT ---
+// --- KIỂU DỮ LIỆU MỚI CHO INDIVIDUALS (HỒ SƠ CÁ NHÂN / KHÁCH HÀNG / BẠN BÈ) - CÓ NHIỀU THÔNG TIN CHI TIẾT ---
 export interface IndividualProfile {
   id: number;
   name: string; // Tên của cá nhân
   contactInfo: string; // Thông tin liên hệ (số điện thoại, email khác, v.v.)
-  address?: string; // Địa chỉ
-  notes?: string; // Ghi chú
+  profileImageUrl?: string; // URL ảnh đại diện
   age?: number;
   dateOfBirth?: string; // Định dạng YYYY-MM-DD
   relationshipStatus?: string;
-  city?: string;
-  country?: string;
-  profileImageUrl?: string;
+  trustReputation?: string; // Mức độ tin cậy/uy tín
+  status?: 'active' | 'pending' | 'inactive'; // Trạng thái của hồ sơ cá nhân
+  address?: string; // Địa chỉ đầy đủ
+  city?: string; // Thành phố
+  country?: string; // Quốc gia
+  phone?: string; // Số điện thoại
+  occupation?: string; // Nghề nghiệp
+  bio?: string; // Tiểu sử
+  interests?: string; // Sở thích (có thể là chuỗi JSON hoặc chuỗi phân cách bằng dấu phẩy)
+  socialMediaLinks?: string; // Link mạng xã hội (chuỗi JSON)
+  emergencyContact?: string; // Liên hệ khẩn cấp
+  notes?: string; // Ghi chú bổ sung
   userId?: number; // ID của tài khoản user liên quan (có thể null nếu không liên kết)
   createdAt: string;
   updatedAt: string | null;
@@ -39,3 +47,4 @@ export type InsertIndividualProfile = Omit<IndividualProfile, 'id' | 'createdAt'
 
 // Kiểu dữ liệu để cập nhật individual
 export type UpdateIndividualProfile = Partial<InsertIndividualProfile>;
+

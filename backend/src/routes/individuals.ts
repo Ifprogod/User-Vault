@@ -22,8 +22,14 @@ router.get('/individuals', async (req, res) => {
         or(
           like(individualsTable.name, `%${search}%`),
           like(individualsTable.contactInfo, `%${search}%`),
-          like(individualsTable.address, `%${search}%`), // Thêm tìm kiếm theo address
-          like(individualsTable.notes, `%${search}%`)    // Thêm tìm kiếm theo notes
+          like(individualsTable.address, `%${search}%`),
+          like(individualsTable.notes, `%${search}%`),
+          like(individualsTable.city, `%${search}%`),
+          like(individualsTable.country, `%${search}%`),
+          like(individualsTable.occupation, `%${search}%`),
+          like(individualsTable.interests, `%${search}%`),
+          like(individualsTable.socialMediaLinks, `%${search}%`),
+          like(individualsTable.emergencyContact, `%${search}%`)
         )
       );
     } else {
@@ -62,7 +68,11 @@ router.post('/individuals', async (req, res) => {
   try {
     const db = await getDb();
     // Lấy tất cả các trường từ body để khớp với schema mới
-    const { name, contactInfo, address, notes, age, dateOfBirth, relationshipStatus, city, country, profileImageUrl, userId } = req.body;
+    const { 
+      name, contactInfo, profileImageUrl, age, dateOfBirth, relationshipStatus, 
+      trustReputation, status, address, city, country, phone, occupation, bio, 
+      interests, socialMediaLinks, emergencyContact, notes, userId 
+    } = req.body;
 
     if (!name || !contactInfo) {
       return res.status(400).json({ message: 'Tên và thông tin liên hệ là bắt buộc.' });
@@ -71,14 +81,22 @@ router.post('/individuals', async (req, res) => {
     const newIndividual = {
       name,
       contactInfo,
-      address: address || null,
-      notes: notes || null,
+      profileImageUrl: profileImageUrl || null,
       age: age || null,
       dateOfBirth: dateOfBirth || null,
       relationshipStatus: relationshipStatus || null,
+      trustReputation: trustReputation || null,
+      status: status || 'active', // Mặc định là 'active' nếu không có
+      address: address || null,
       city: city || null,
       country: country || null,
-      profileImageUrl: profileImageUrl || null,
+      phone: phone || null,
+      occupation: occupation || null,
+      bio: bio || null,
+      interests: interests || null,
+      socialMediaLinks: socialMediaLinks || null,
+      emergencyContact: emergencyContact || null,
+      notes: notes || null,
       userId: userId || null,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -102,7 +120,11 @@ router.put('/individuals/:id', async (req, res) => {
     }
 
     // Lấy tất cả các trường từ body để khớp với schema mới
-    const { name, contactInfo, address, notes, age, dateOfBirth, relationshipStatus, city, country, profileImageUrl, userId } = req.body;
+    const { 
+      name, contactInfo, profileImageUrl, age, dateOfBirth, relationshipStatus, 
+      trustReputation, status, address, city, country, phone, occupation, bio, 
+      interests, socialMediaLinks, emergencyContact, notes, userId 
+    } = req.body;
 
     const updatedIndividual: Partial<typeof individualsTable.$inferInsert> = {
       updatedAt: new Date(),
@@ -110,14 +132,22 @@ router.put('/individuals/:id', async (req, res) => {
 
     if (name !== undefined) updatedIndividual.name = name;
     if (contactInfo !== undefined) updatedIndividual.contactInfo = contactInfo;
-    if (address !== undefined) updatedIndividual.address = address;
-    if (notes !== undefined) updatedIndividual.notes = notes;
+    if (profileImageUrl !== undefined) updatedIndividual.profileImageUrl = profileImageUrl;
     if (age !== undefined) updatedIndividual.age = age;
     if (dateOfBirth !== undefined) updatedIndividual.dateOfBirth = dateOfBirth;
     if (relationshipStatus !== undefined) updatedIndividual.relationshipStatus = relationshipStatus;
+    if (trustReputation !== undefined) updatedIndividual.trustReputation = trustReputation;
+    if (status !== undefined) updatedIndividual.status = status;
+    if (address !== undefined) updatedIndividual.address = address;
     if (city !== undefined) updatedIndividual.city = city;
     if (country !== undefined) updatedIndividual.country = country;
-    if (profileImageUrl !== undefined) updatedIndividual.profileImageUrl = profileImageUrl;
+    if (phone !== undefined) updatedIndividual.phone = phone;
+    if (occupation !== undefined) updatedIndividual.occupation = occupation;
+    if (bio !== undefined) updatedIndividual.bio = bio;
+    if (interests !== undefined) updatedIndividual.interests = interests;
+    if (socialMediaLinks !== undefined) updatedIndividual.socialMediaLinks = socialMediaLinks;
+    if (emergencyContact !== undefined) updatedIndividual.emergencyContact = emergencyContact;
+    if (notes !== undefined) updatedIndividual.notes = notes;
     if (userId !== undefined) updatedIndividual.userId = userId;
 
 
@@ -155,3 +185,4 @@ router.delete('/individuals/:id', async (req, res) => {
 });
 
 export default router;
+
