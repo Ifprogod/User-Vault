@@ -1,5 +1,5 @@
 // src/utils/seed.ts
-import { getDb } from '../db/db'; // <-- ĐÃ SỬA: Import hàm getDb thay vì biến db trực tiếp
+import { getDb } from '../db/db';
 import { users } from '../db/schema';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
@@ -13,7 +13,7 @@ export async function seedAdminUser() {
   try {
     console.log('Đang kiểm tra và gieo hạt tài khoản admin test...');
 
-    const db = await getDb(); // <-- ĐÃ SỬA: Lấy db instance bằng cách await getDb()
+    const db = await getDb();
 
     // Kiểm tra xem tài khoản admin đã tồn tại chưa
     const existingAdmin = await db.select().from(users).where(eq(users.email, ADMIN_EMAIL)).limit(1);
