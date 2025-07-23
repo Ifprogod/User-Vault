@@ -2,10 +2,10 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import { getDb, createSchema } from './db/db'; // <-- ĐÃ SỬA: Thêm createSchema
+import { getDb, createSchema } from './db/db'; 
 import authRoutes from './routes/auth';
 import userRoutes from './routes/users';
-import individualsRoute from './routes/individuals'; // <-- ĐÃ THÊM: Import individualsRoute
+import individualsRoute from './routes/individuals'; 
 
 dotenv.config(); // Load biến môi trường
 
@@ -16,7 +16,7 @@ const PORT = process.env.PORT || 5000;
 // Cấu hình CORS
 // Để cho phép frontend truy cập từ bất kỳ miền nào trong môi trường dev
 const corsOptions = {
-  origin: '*', // <-- ĐÃ SỬA: Cho phép tất cả các nguồn (chỉ dùng trong dev)
+  origin: '*', // Cho phép tất cả các nguồn (chỉ dùng trong dev)
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   credentials: true,
   optionsSuccessStatus: 204,
@@ -33,7 +33,7 @@ app.get('/', (req, res) => {
 // Sử dụng các routes
 app.use('/api', authRoutes); // Các route xác thực sẽ bắt đầu với /api
 app.use('/api', userRoutes); // Các route quản lý người dùng sẽ bắt đầu với /api
-app.use('/api', individualsRoute); // <-- ĐÃ THÊM: Route cho Individuals
+app.use('/api', individualsRoute); 
 
 // Khởi động server
 app.listen(PORT, async () => {
@@ -45,7 +45,7 @@ app.listen(PORT, async () => {
     await createSchema(); // <-- ĐÃ THÊM: Gọi hàm createSchema để đảm bảo bảng được tạo
     console.log('Schema database đã được tạo/kiểm tra thành công!');
 
-    const db = await getDb(); // <-- Gọi hàm getDb để lấy instance db
+    const db = await getDb();
 
     // Import usersTable ở đây để tránh lỗi circular dependency nếu schema.ts cũng import db
     const { users: usersTable } = await import('./db/schema');
